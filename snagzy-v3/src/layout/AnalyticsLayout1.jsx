@@ -4,7 +4,7 @@ import { PageHeader } from "../components/PageHeader";
 import { useData } from "../context/DataContext";
 import { useState, useMemo, useEffect } from "react";
 
-export const AnalyticsLayout = () => {
+export const AnalyticsLayout1 = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { getAnalyticsLayoutNavLinks, getAllOrders } = useData();
 
@@ -12,24 +12,12 @@ export const AnalyticsLayout = () => {
   const orders = getAllOrders();
   const count = 6;
 
-  const urlYear = searchParams.get("year");
-  const urlMonth = searchParams.get("month");
-  const urlDay = searchParams.get("day");
-
-  // Keep track of internal select states syncing to the URL params
-  const [selectedYear, setSelectedYear] = useState(urlYear || "all");
-  const [selectedMonth, setSelectedMonth] = useState(urlMonth || "all");
-  const [selectedDay, setSelectedDay] = useState(urlDay || "all");
+  // --- FIX: Read filters directly from URL parameter strings instead of managing local component states ---
+  const selectedYear = searchParams.get("year") || "all";
+  const selectedMonth = searchParams.get("month") || "all";
+  const selectedDay = searchParams.get("day") || "all";
 
   const [isInitialLoad, setIsInitialLoad] = useState(true);
-
-  // Add this useEffect to sync URL params with internal state
-  useEffect(() => {
-    setSelectedYear(urlYear || "all");
-    setSelectedMonth(urlMonth || "all");
-    setSelectedDay(urlDay || "all");
-    setIsInitialLoad(false);
-  }, [urlYear, urlMonth, urlDay]);
 
   // Dynamically compute selectable Years and Months based on incoming orders
   const { availableYears, availableMonthsByYear } = useMemo(() => {
@@ -142,26 +130,21 @@ export const AnalyticsLayout = () => {
   };
 
   const handleClearFilters = () => {
-    setSelectedYear("all");
-    setSelectedMonth("all");
-    setSelectedDay("all");
-
     const params = new URLSearchParams(searchParams);
     params.delete("year");
     params.delete("month");
     params.delete("day");
     params.set("orders", count.toString());
     params.delete("itemLimits");
-
-    params.delete("revenueTab");
-    params.delete("revenueStatsView");
-
-    // Clear custom widget sizing fields context if they exist
     params.delete("top_products");
     params.delete("top_buyers");
     params.delete("top_stores");
     setSearchParams(params, { replace: !isInitialLoad });
   };
+
+  useEffect(() => {
+    setIsInitialLoad(false);
+  }, []);
 
   return (
     <div className="flex flex-col w-full bg-white border border-gray-300 rounded-md overflow-hidden">
@@ -289,7 +272,7 @@ export const AnalyticsLayout = () => {
         </div>
       </div>
 
-      <div className="flex flex-col h-full w-full bg-[#F3F3F3] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 hover:scrollbar-thumb-gray-400">
+      <div className="flex flex-col h-full w-full bg-[#F3F3F3] overflow-y-auto">
         <div className="flex w-full p-2">
           <Outlet />
         </div>

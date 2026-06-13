@@ -694,6 +694,10 @@ export const DataProvider = ({ children }) => {
   const getUserLayoutNavLinks = () => {
     return navLinks.filter((navlink) => navlink.type === "user-level");
   };
+  // Get analytics layout nav links.
+  const getAnalyticsLayoutNavLinks = () => {
+    return navLinks.filter((navlink) => navlink.type === "analytics-level");
+  };
   // Get orders layout nav links.
   const getOrdersLayoutNavLinks = () => {
     return navLinks.filter((navlink) => navlink.type === "orders-level");
@@ -808,6 +812,7 @@ export const DataProvider = ({ children }) => {
         getSidebarNavLinks,
         getProductLayoutNavLinks,
         getUserLayoutNavLinks,
+        getAnalyticsLayoutNavLinks,
         getOrdersLayoutNavLinks,
         getRevenueLayoutNavLinks,
         getAllItemStatus,

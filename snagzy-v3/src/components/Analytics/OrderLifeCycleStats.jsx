@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { IoIosArrowDown } from "../SVG";
 import {
   statusCompleted,
@@ -19,30 +19,137 @@ import {
   statusRefundSuccess,
   orderLifeCycle,
 } from "../../data/orderLifeCycle";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
-import { MiniAnalyticsStatCardV2 } from "./AnalyticsStatCards";
-import { amountToDecimal, formatWithCommas } from "../../utils/helpers";
+import { OrderLifeCycleStatsBoxes } from "./OrderLifeCycleStatsBoxes";
+import { OrderLifeCycleChart } from "./OrderLifeCycleChart";
+import { DisplayedOrders } from "./DisplayedOrders";
+import { useData } from "../../context/DataContext";
+import { useLocation, useSearchParams } from "react-router-dom";
+
+const ITEM_INCREMENT = 2;
 
 export const OrderLifeCycleStats = ({
   processOrderLifeCycleData,
   analyticsData,
+  activeOrderLifeCycleTab,
+  onOrderLifeCycleViewChange,
+  orderLifeCycleView,
+  ordersLimit,
+  setOrdersLimit,
+  itemsLimits,
+  setItemsLimits,
+  defaultItemsCount = 3,
+  count = 6,
 }) => {
-  const [isOpen, setIsOpen] = useState(true);
-  const toggleOpen = () => setIsOpen(!isOpen);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [orderLifeCycleStatsViewOpen, setOrderLifeCycleStatsViewOpen] =
+    useState(true);
+  const { sumOrderQuantities, getAllAttributes } = useData();
+  const attributes = getAllAttributes();
+  const location = useLocation();
+
+  const toggleOrderLifeCycleStats = () =>
+    setOrderLifeCycleStatsViewOpen(!orderLifeCycleStatsViewOpen);
+
+  // Pre-process data for each card
+  const amountedData = (orderLifeCycleStatus) => {
+    return processOrderLifeCycleData(orderLifeCycleStatus, analyticsData);
+  };
+
+  const getOrderData = () => {
+    switch (activeOrderLifeCycleTab) {
+      case "order_placed":
+        return amountedData(statusCompleted).ordersToProcess;
+      case "payment_pending":
+        return amountedData(statusPaymentPending).ordersToProcess;
+      case "payment_confirmed":
+        return amountedData(statusPaymentConfirmed).ordersToProcess;
+      case "processing":
+        return amountedData(statusProcessing).ordersToProcess;
+      case "packed":
+        return amountedData(statusPacked).ordersToProcess;
+      case "shipped":
+        return amountedData(statusShipped).ordersToProcess;
+      case "out_for_delivery":
+        return amountedData(statusOutForDelivery).ordersToProcess;
+      case "delivered":
+        return amountedData(statusDelivered).ordersToProcess;
+      case "completed":
+        return amountedData(statusCompleted).ordersToProcess;
+      case "cancelled_by_buyer":
+        return amountedData(statusCancelledByBuyer).ordersToProcess;
+      case "cancelled_by_seller":
+        return amountedData(statusCancelledBySeller).ordersToProcess;
+      case "delivery_failed":
+        return amountedData(statusDeliveryFailed).ordersToProcess;
+      case "attempted_delivery":
+        return amountedData(statusAttemptedDelivery).ordersToProcess;
+      case "return_request":
+        return amountedData(statusReturnRequest).ordersToProcess;
+      case "order_returned":
+        return amountedData(statusOrderReturned).ordersToProcess;
+      case "refund_success":
+        return amountedData(statusRefundSuccess).ordersToProcess;
+      default:
+        return amountedData(statusDelivered).ordersToProcess;
+    }
+  };
+
+  const orderData = getOrderData();
+
+  const displayedOrders = useMemo(() => {
+    return [...orderData]
+      .sort((a, b) => {
+        const dateA = new Date(a.currentStatus?.timestamp || 0);
+        const dateB = new Date(b.currentStatus?.timestamp || 0);
+        return dateB - dateA;
+      })
+      .slice(0, ordersLimit);
+  }, [orderData, ordersLimit]);
+
+  // Revenue stats clickable stat cards
+  const handleOrderLifeCycleTbChange = (tab) => {
+    const params = new URLSearchParams(searchParams);
+    params.set("orderLifeCycleTab", tab);
+    params.set("orders", count.toString());
+    params.delete("itemLimits");
+    setSearchParams(params);
+  };
+
+  const handleLoadMoreOrders = () => {
+    const totalOrdersCount = orderData.length;
+    const nextLimit = Math.min(ordersLimit + count, totalOrdersCount);
+    setOrdersLimit(nextLimit);
+  };
+
+  const handleLoadMoreItems = (orderId, totalItems) => {
+    const currentLimit = itemsLimits[orderId] || defaultItemsCount;
+    const nextLimit = Math.min(currentLimit + ITEM_INCREMENT, totalItems);
+    setItemsLimits((prev) => ({ ...prev, [orderId]: nextLimit }));
+  };
+
+  const handleResetItems = (orderId) => {
+    setItemsLimits((prev) => {
+      const updated = { ...prev };
+      delete updated[orderId];
+      return updated;
+    });
+  };
+
+  const getButtonClasses = (isActive, isDisabled) => {
+    const base = "flex rounded text-[12px] px-3 py-1 transition-colors";
+    const modeClass = isActive
+      ? "bg-gray-200 text-gray-700"
+      : "bg-gray-100 text-gray-400";
+    const interactiveClass = isDisabled
+      ? "cursor-not-allowed"
+      : "hover:bg-gray-200 cursor-pointer";
+    return `${base} ${modeClass} ${interactiveClass}`;
+  };
 
   return (
-    <div className="flex mt-2 w-full pl-2 pr-2 pb-2">
+    <div className="flex flex-col w-full">
       <div
-        className={`${isOpen ? "h-full" : "h-15"} w-full p-3 bg-gray-50 border border-gray-200 rounded-md transition-all duration-300 ease-in-out overflow-hidden`}
+        className={`${orderLifeCycleStatsViewOpen ? "h-full" : "h-15"} bg-gray-50 w-full p-3 border border-[#C2C2C2] rounded-md transition-all duration-300 ease-in-out overflow-hidden`}
       >
         <div className="flex relative items-center justify-between">
           <div className="flex">
@@ -50,15 +157,37 @@ export const OrderLifeCycleStats = ({
           </div>
 
           <div className="flex gap-6 border-gray-300 items-center">
-            <div className="flex">
+            <div className="flex gap-2">
               <button
-                onClick={toggleOpen}
-                className={`flex ${isOpen ? "bg-gray-200" : "bg-gray-100"} rounded px-1 py-1 hover:bg-gray-200 cursor-pointer`}
+                className={getButtonClasses(
+                  orderLifeCycleView === "list",
+                  !orderLifeCycleStatsViewOpen,
+                )}
+                onClick={() => onOrderLifeCycleViewChange("list")}
+                disabled={!orderLifeCycleStatsViewOpen}
+              >
+                LIST
+              </button>
+
+              <button
+                className={getButtonClasses(
+                  orderLifeCycleView === "chart",
+                  !orderLifeCycleStatsViewOpen,
+                )}
+                onClick={() => onOrderLifeCycleViewChange("chart")}
+                disabled={!orderLifeCycleStatsViewOpen}
+              >
+                CHART
+              </button>
+
+              <button
+                onClick={toggleOrderLifeCycleStats}
+                className={`flex ${orderLifeCycleStatsViewOpen ? "bg-gray-200" : "bg-gray-100"} rounded px-1 py-1 hover:bg-gray-200 cursor-pointer`}
               >
                 <IoIosArrowDown
                   height={16}
                   width={16}
-                  className={`${isOpen ? "rotate-180" : ""} transition-all duration-300 ease-in-out`}
+                  className={`${orderLifeCycleStatsViewOpen ? "rotate-180" : ""} transition-all duration-300 ease-in-out`}
                 />
               </button>
             </div>
@@ -66,284 +195,53 @@ export const OrderLifeCycleStats = ({
         </div>
 
         {/* Analytics boxes */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2 mt-4">
-          <MiniAnalyticsStatCardV2
-            miniAnalyticsData={processOrderLifeCycleData(
-              statusCompleted,
-              analyticsData,
-            )}
-            boxTitle={"Completed"}
-            boxStyle={"bg-green-200 border-green-400"}
-          />
-          <MiniAnalyticsStatCardV2
-            miniAnalyticsData={processOrderLifeCycleData(
-              statusDelivered,
-              analyticsData,
-            )}
-            boxTitle={"Delivered"}
-            boxStyle={"bg-lime-200 border-lime-400"}
-          />
-          <MiniAnalyticsStatCardV2
-            miniAnalyticsData={processOrderLifeCycleData(
-              statusOrderPlaced,
-              analyticsData,
-            )}
-            boxTitle={"Order Placed"}
-            boxStyle={"bg-amber-100 border-amber-200"}
-          />
-          <MiniAnalyticsStatCardV2
-            miniAnalyticsData={processOrderLifeCycleData(
-              statusPaymentPending,
-              analyticsData,
-            )}
-            boxTitle={"Payment Pending"}
-            boxStyle={"bg-amber-100 border-amber-200"}
-          />
-          <MiniAnalyticsStatCardV2
-            miniAnalyticsData={processOrderLifeCycleData(
-              statusPaymentConfirmed,
-              analyticsData,
-            )}
-            boxTitle={"Payment Confirmed"}
-            boxStyle={"bg-amber-100 border-amber-200"}
-          />
-          <MiniAnalyticsStatCardV2
-            miniAnalyticsData={processOrderLifeCycleData(
-              statusProcessing,
-              analyticsData,
-            )}
-            boxTitle={"Processing"}
-            boxStyle={"bg-amber-100 border-amber-200"}
-          />
-          <MiniAnalyticsStatCardV2
-            miniAnalyticsData={processOrderLifeCycleData(
-              statusPacked,
-              analyticsData,
-            )}
-            boxTitle={"Packed"}
-            boxStyle={"bg-amber-100 border-amber-200"}
-          />
-          <MiniAnalyticsStatCardV2
-            miniAnalyticsData={processOrderLifeCycleData(
-              statusShipped,
-              analyticsData,
-            )}
-            boxTitle={"Shipped"}
-            boxStyle={"bg-amber-100 border-amber-200"}
-          />
-          <MiniAnalyticsStatCardV2
-            miniAnalyticsData={processOrderLifeCycleData(
-              statusOutForDelivery,
-              analyticsData,
-            )}
-            boxTitle={"Out For Delivery"}
-            boxStyle={"bg-amber-100 border-amber-200"}
-          />
-          <MiniAnalyticsStatCardV2
-            miniAnalyticsData={processOrderLifeCycleData(
-              statusDeliveryFailed,
-              analyticsData,
-            )}
-            boxTitle={"Delivery Failed"}
-            boxStyle={"bg-amber-100 border-amber-200"}
-          />
-          <MiniAnalyticsStatCardV2
-            miniAnalyticsData={processOrderLifeCycleData(
-              statusAttemptedDelivery,
-              analyticsData,
-            )}
-            boxTitle={"Attempted Delivery"}
-            boxStyle={"bg-amber-100 border-amber-200"}
-          />
-          <MiniAnalyticsStatCardV2
-            miniAnalyticsData={processOrderLifeCycleData(
-              statusCancelledByBuyer,
-              analyticsData,
-            )}
-            boxTitle={"Cancelled by Buyer"}
-            boxStyle={"bg-red-100 border-red-200"}
-          />
-          <MiniAnalyticsStatCardV2
-            miniAnalyticsData={processOrderLifeCycleData(
-              statusCancelledBySeller,
-              analyticsData,
-            )}
-            boxTitle={"Cancelled by Seller"}
-            boxStyle={"bg-red-100 border-red-200"}
-          />
-          <MiniAnalyticsStatCardV2
-            miniAnalyticsData={processOrderLifeCycleData(
-              statusReturnRequest,
-              analyticsData,
-            )}
-            boxTitle={"Return Request"}
-            boxStyle={"bg-red-100 border-red-200"}
-          />
-          <MiniAnalyticsStatCardV2
-            miniAnalyticsData={processOrderLifeCycleData(
-              statusOrderReturned,
-              analyticsData,
-            )}
-            boxTitle={"Returned"}
-            boxStyle={"bg-red-100 border-red-200"}
-          />
-          <MiniAnalyticsStatCardV2
-            miniAnalyticsData={processOrderLifeCycleData(
-              statusRefundSuccess,
-              analyticsData,
-            )}
-            boxTitle={"Returned Success"}
-            boxStyle={"bg-red-100 border-red-200"}
-          />
-        </div>
+        <OrderLifeCycleStatsBoxes
+          onOrderLifeCycleTabChange={handleOrderLifeCycleTbChange}
+          processOrderLifeCycleData={processOrderLifeCycleData}
+          analyticsData={analyticsData}
+          statusCompleted={statusCompleted}
+          statusDelivered={statusDelivered}
+          statusOrderPlaced={statusOrderPlaced}
+          statusPaymentPending={statusPaymentPending}
+          statusPaymentConfirmed={statusPaymentConfirmed}
+          statusProcessing={statusProcessing}
+          statusPacked={statusPacked}
+          statusShipped={statusShipped}
+          statusOutForDelivery={statusOutForDelivery}
+          statusDeliveryFailed={statusDeliveryFailed}
+          statusAttemptedDelivery={statusAttemptedDelivery}
+          statusCancelledByBuyer={statusCancelledByBuyer}
+          statusCancelledBySeller={statusCancelledBySeller}
+          statusReturnRequest={statusReturnRequest}
+          statusOrderReturned={statusOrderReturned}
+          statusRefundSuccess={statusRefundSuccess}
+        />
 
-        {/* Bar chart */}
-        <div className="flex w-full mt-2">
-          <div className="w-full p-3 bg-white border border-gray-200 rounded-md transition-all duration-300 ease-in-out overflow-hidden">
-            <div className="w-full">
-              <ResponsiveContainer width="100%" height={400}>
-                <BarChart
-                  data={orderLifeCycle.map((status) => {
-                    const {
-                      ordersToProcess,
-                      sumOfTotalPrices,
-                      sumOfAllQuantities,
-                    } = processOrderLifeCycleData(status.slug, analyticsData);
-                    return {
-                      name: status.label,
-                      Orders: ordersToProcess?.length || 0,
-                      Revenue: Number(sumOfTotalPrices) || 0,
-                      Items: Number(sumOfAllQuantities) || 0,
-                    };
-                  })}
-                  margin={{ top: 20, right: 10, left: 0, bottom: 20 }}
-                  barGap={4}
-                >
-                  {/* Subtle horizontal grid lines */}
-                  <CartesianGrid
-                    strokeDasharray="4 4"
-                    stroke="#f0f0f0"
-                    vertical={false}
-                  />
+        {orderLifeCycleView === "chart" && (
+          <OrderLifeCycleChart
+            activeOrderLifeCycleTab={activeOrderLifeCycleTab}
+            orderLifeCycle={orderLifeCycle}
+            processOrderLifeCycleData={processOrderLifeCycleData}
+            analyticsData={analyticsData}
+          />
+        )}
 
-                  <XAxis
-                    dataKey="name"
-                    angle={-35}
-                    textAnchor="end"
-                    height={75}
-                    interval={0}
-                    stroke="#6b7280"
-                    tick={{ fontSize: 13, fontWeight: 500 }}
-                    tickLine={false}
-                  />
-
-                  <YAxis
-                    yAxisId="left"
-                    stroke="#6b7280"
-                    tick={{ fontSize: 13 }}
-                    tickLine={false}
-                    axisLine={false}
-                  />
-                  <YAxis
-                    yAxisId="right"
-                    orientation="right"
-                    stroke="#6b7280"
-                    tick={{ fontSize: 13 }}
-                    tickLine={false}
-                    axisLine={false}
-                    tickFormatter={(val) =>
-                      `$${val >= 1000 ? (val / 1000).toFixed(0) + "k" : val}`
-                    }
-                  />
-
-                  {/* Custom elegant floating glassmorphic tooltip */}
-                  <Tooltip
-                    cursor={{ fill: "#f9fafb" }}
-                    content={({ active, payload, label }) => {
-                      if (active && payload && payload.length) {
-                        return (
-                          <div className="bg-white/95 backdrop-blur-xs p-4 border border-gray-200 shadow-xl rounded-xl font-sans text-xs min-w-[180px]">
-                            <p className="font-bold text-gray-800 border-b border-gray-100 pb-2 mb-2 text-sm">
-                              {label}
-                            </p>
-                            <div className="space-y-2">
-                              {payload.map((entry, index) => {
-                                const isRevenue = entry.name === "Revenue";
-                                const formattedValue = isRevenue
-                                  ? `$${amountToDecimal(entry.value)}`
-                                  : entry.name === "Items"
-                                    ? formatWithCommas(entry.value)
-                                    : entry.value;
-
-                                return (
-                                  <div
-                                    key={index}
-                                    className="flex items-center justify-between gap-4"
-                                  >
-                                    <div className="flex items-center gap-2 text-gray-600 font-medium">
-                                      <span
-                                        className="w-2.5 h-2.5 rounded-full inline-block"
-                                        style={{ backgroundColor: entry.color }}
-                                      />
-                                      <span>{entry.name}</span>
-                                    </div>
-                                    <span className="font-bold text-gray-900">
-                                      {formattedValue}
-                                    </span>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          </div>
-                        );
-                      }
-                      return null;
-                    }}
-                  />
-
-                  <Legend
-                    verticalAlign="top"
-                    height={40}
-                    iconType="circle"
-                    iconSize={8}
-                    wrapperStyle={{
-                      fontSize: "12px",
-                      fontWeight: 500,
-                      color: "#374151",
-                      paddingBottom: "15px",
-                    }}
-                  />
-
-                  {/* Modernized Rounded Pill Bars */}
-                  <Bar
-                    yAxisId="left"
-                    dataKey="Orders"
-                    fill="#6366f1"
-                    radius={[4, 4, 0, 0]}
-                    maxBarSize={35}
-                    name="Orders"
-                  />
-                  <Bar
-                    yAxisId="right"
-                    dataKey="Revenue"
-                    fill="#10b981"
-                    radius={[4, 4, 0, 0]}
-                    maxBarSize={35}
-                    name="Revenue"
-                  />
-                  <Bar
-                    yAxisId="left"
-                    dataKey="Items"
-                    fill="#f59e0b"
-                    radius={[4, 4, 0, 0]}
-                    maxBarSize={35}
-                    name="Items"
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        </div>
+        {orderLifeCycleView === "list" && (
+          <DisplayedOrders
+            displayedOrders={displayedOrders}
+            tableHeaderBg="#E5E7EB"
+            itemsLimits={itemsLimits}
+            onLoadMoreItems={handleLoadMoreItems}
+            onResetItems={handleResetItems}
+            ordersLimit={ordersLimit}
+            totalOrdersCount={orderData.length}
+            onLoadMoreOrders={handleLoadMoreOrders}
+            defaultItemsCount={defaultItemsCount}
+            attributes={attributes}
+            location={location}
+            sumOrderQuantities={sumOrderQuantities}
+          />
+        )}
       </div>
     </div>
   );
