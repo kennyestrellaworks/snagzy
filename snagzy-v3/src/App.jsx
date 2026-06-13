@@ -29,24 +29,41 @@ import { UserOrdersLayout } from "./layout/UserOrdersLayout";
 import { UserOrdersAll } from "./pages/users/orders/UserOrdersAll";
 import { UserOrdersPending } from "./pages/users/orders/UserOrdersPending";
 import { UserOrdersPurchased } from "./pages/users/orders/UserOrdersPurchased";
+import { Stores } from "./pages/stores/Stores";
 import { Dashboard } from "./pages/Dashboard";
 import { Dashboard1 } from "./pages/Dashboard1";
 import { Dashboard2 } from "./pages/Dashboard2";
 import { Dashboard3 } from "./pages/Dashboard3";
 import { ReviewsDashboard } from "./pages/ReviewsDashboard";
-import { Stores } from "./pages/stores/Stores";
-import { ProductsAnalytics } from "./pages/ProductsAnalytics";
+import { ProductsDashboard } from "./pages/ProductsDashboard";
 import { ReviewsDashboard1 } from "./pages/ReviewsDashboard1";
 import { UserDashboard } from "./pages/UserDashboard";
 import { UserDashboard1 } from "./pages/UserDashboard1";
-import { StoresAnalytics } from "./pages/StoresAnalytics";
-import { InventoriesAnalytics } from "./pages/InventoriesAnalytics";
+import { StoresDashboard } from "./pages/StoresDashboard";
+import { InventoriesDashboard } from "./pages/InventoriesDashboard";
+
+import { AnalyticsLayout } from "./layout/AnalyticsLayout";
+import { ProductsAnalytics } from "./pages/analytics/ProductsAnalytics";
+import { InventoriesAnalytics } from "./pages/analytics/InventoriesAnalytics";
+import { UsersAnalytics } from "./pages/analytics/UsersAnalytics";
+import { StoresAnalytics } from "./pages/analytics/StoresAnalytics";
+import { OrdersAnalytics } from "./pages/analytics/OrdersAnalytics";
+import { ReviewsAnalytics } from "./pages/analytics/ReviewsAnalytics";
 
 export const App = () => {
   const router = createBrowserRouter(
     createRoutesFromElements(
       <Route path="/" element={<RootLayout />}>
-        <Route index element={<Analytics />} />
+        <Route path="analytics" element={<AnalyticsLayout />}>
+          {/* <Route index element={<ProductsAnalytics />} /> */}
+          <Route index element={<OrdersAnalytics />} />
+          <Route path="inventories" element={<InventoriesAnalytics />} />
+          <Route path="users" element={<UsersAnalytics />} />
+          <Route path="stores" element={<StoresAnalytics />} />
+          <Route path="products" element={<ProductsAnalytics />} />
+          <Route path="reviews" element={<ReviewsAnalytics />} />
+        </Route>
+
         <Route path="products" element={<Products />} />
 
         <Route path="products/:slug/:productId" element={<ProductLayout />}>
@@ -66,9 +83,9 @@ export const App = () => {
         <Route path="userdashboard1" element={<UserDashboard1 />} />
         <Route path="reviewsdashboard" element={<ReviewsDashboard />} />
         <Route path="reviewsdashboard1" element={<ReviewsDashboard1 />} />
-        <Route path="productsanalytics" element={<ProductsAnalytics />} />
-        <Route path="storesanalytics" element={<StoresAnalytics />} />
-        <Route path="inventoriesanalytics" element={<InventoriesAnalytics />} />
+        <Route path="productsdashboard" element={<ProductsDashboard />} />
+        <Route path="storesdashboard" element={<StoresDashboard />} />
+        <Route path="inventoriesdashboard" element={<InventoriesDashboard />} />
 
         <Route path="users" element={<Users />} />
         <Route path="stores" element={<Stores />} />

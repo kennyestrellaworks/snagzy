@@ -2,7 +2,7 @@ import { amountToDecimal, formatWithCommas } from "../../utils/helpers";
 import { AmountFormat } from "../AmountFormat";
 import { DollarSign } from "../SVG";
 
-export const MiniAnalyticsStatCard = ({
+export const AnalyticsStatCardMini = ({
   miniAnalyticsData,
   boxTitle,
   boxStyle,
@@ -45,7 +45,7 @@ export const MiniAnalyticsStatCard = ({
   );
 };
 
-export const MiniAnalyticsStatCardV2 = ({
+export const AnalyticsStatCardMiniV2 = ({
   miniAnalyticsData,
   boxTitle,
   boxStyle,
@@ -54,8 +54,8 @@ export const MiniAnalyticsStatCardV2 = ({
     miniAnalyticsData;
 
   return (
-    <div className="flex">
-      <div className={`flex flex-col border ${boxStyle} w-full p-1 rounded-sm`}>
+    <div className="flex cursor-pointer">
+      <div className={`flex flex-col border ${boxStyle} w-full p-1 rounded-md`}>
         <h1 className="leading-tight text-[12px]">{boxTitle}</h1>
         <div className="flex items-center justify-between">
           {/* <AmountFormat amount={sumOfTotalPrices} /> */}
@@ -96,7 +96,7 @@ export const MiniAnalyticsStatCardV2 = ({
   );
 };
 
-export const MediumAnalyticsStatCard = ({
+export const AnalyticsStatCardMedium = ({
   miniAnalyticsData,
   boxTitle,
   boxStyle,
@@ -106,6 +106,7 @@ export const MediumAnalyticsStatCard = ({
 }) => {
   const { ordersToProcess, sumOfTotalPrices, sumOfAllQuantities } =
     miniAnalyticsData;
+  // [{ ordersToProcess: [], sumOfTotalPrices: 1.25 sumOfAllQuantities: 1 }];
 
   return (
     <div className="flex">

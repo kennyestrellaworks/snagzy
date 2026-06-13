@@ -87,7 +87,7 @@ export const RevenueOverTimeChart = ({
           Daily pipeline value distribution across key lifecycle states
         </p>
       </div>
-      <div className="w-full h-72">
+      <div className="w-full h-100">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={chartData}

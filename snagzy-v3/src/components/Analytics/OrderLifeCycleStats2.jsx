@@ -29,7 +29,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { MiniAnalyticsStatCardV2 } from "./AnalyticsStatCards";
+import { AnalyticsStatCardMiniV2 } from "./AnalyticsStatCards";
 import { amountToDecimal, formatWithCommas } from "../../utils/helpers";
 
 export const OrderLifeCycleStats2 = ({
@@ -67,7 +67,7 @@ export const OrderLifeCycleStats2 = ({
 
         {/* Analytics boxes */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2 mt-4">
-          <MiniAnalyticsStatCardV2
+          <AnalyticsStatCardMiniV2
             miniAnalyticsData={processOrderLifeCycleData(
               statusCompleted,
               analyticsData,
@@ -75,7 +75,7 @@ export const OrderLifeCycleStats2 = ({
             boxTitle={"Completed"}
             boxStyle={"bg-green-200 border-green-400"}
           />
-          <MiniAnalyticsStatCardV2
+          <AnalyticsStatCardMiniV2
             miniAnalyticsData={processOrderLifeCycleData(
               statusDelivered,
               analyticsData,
@@ -83,7 +83,7 @@ export const OrderLifeCycleStats2 = ({
             boxTitle={"Delivered"}
             boxStyle={"bg-lime-200 border-lime-400"}
           />
-          <MiniAnalyticsStatCardV2
+          <AnalyticsStatCardMiniV2
             miniAnalyticsData={processOrderLifeCycleData(
               statusOrderPlaced,
               analyticsData,
@@ -91,7 +91,7 @@ export const OrderLifeCycleStats2 = ({
             boxTitle={"Order Placed"}
             boxStyle={"bg-amber-100 border-amber-200"}
           />
-          <MiniAnalyticsStatCardV2
+          <AnalyticsStatCardMiniV2
             miniAnalyticsData={processOrderLifeCycleData(
               statusPaymentPending,
               analyticsData,
@@ -99,7 +99,7 @@ export const OrderLifeCycleStats2 = ({
             boxTitle={"Payment Pending"}
             boxStyle={"bg-amber-100 border-amber-200"}
           />
-          <MiniAnalyticsStatCardV2
+          <AnalyticsStatCardMiniV2
             miniAnalyticsData={processOrderLifeCycleData(
               statusPaymentConfirmed,
               analyticsData,
@@ -107,7 +107,7 @@ export const OrderLifeCycleStats2 = ({
             boxTitle={"Payment Confirmed"}
             boxStyle={"bg-amber-100 border-amber-200"}
           />
-          <MiniAnalyticsStatCardV2
+          <AnalyticsStatCardMiniV2
             miniAnalyticsData={processOrderLifeCycleData(
               statusProcessing,
               analyticsData,
@@ -115,7 +115,7 @@ export const OrderLifeCycleStats2 = ({
             boxTitle={"Processing"}
             boxStyle={"bg-amber-100 border-amber-200"}
           />
-          <MiniAnalyticsStatCardV2
+          <AnalyticsStatCardMiniV2
             miniAnalyticsData={processOrderLifeCycleData(
               statusPacked,
               analyticsData,
@@ -123,7 +123,7 @@ export const OrderLifeCycleStats2 = ({
             boxTitle={"Packed"}
             boxStyle={"bg-amber-100 border-amber-200"}
           />
-          <MiniAnalyticsStatCardV2
+          <AnalyticsStatCardMiniV2
             miniAnalyticsData={processOrderLifeCycleData(
               statusShipped,
               analyticsData,
@@ -131,7 +131,7 @@ export const OrderLifeCycleStats2 = ({
             boxTitle={"Shipped"}
             boxStyle={"bg-amber-100 border-amber-200"}
           />
-          <MiniAnalyticsStatCardV2
+          <AnalyticsStatCardMiniV2
             miniAnalyticsData={processOrderLifeCycleData(
               statusOutForDelivery,
               analyticsData,
@@ -139,7 +139,7 @@ export const OrderLifeCycleStats2 = ({
             boxTitle={"Out For Delivery"}
             boxStyle={"bg-amber-100 border-amber-200"}
           />
-          <MiniAnalyticsStatCardV2
+          <AnalyticsStatCardMiniV2
             miniAnalyticsData={processOrderLifeCycleData(
               statusDeliveryFailed,
               analyticsData,
@@ -147,7 +147,7 @@ export const OrderLifeCycleStats2 = ({
             boxTitle={"Delivery Failed"}
             boxStyle={"bg-amber-100 border-amber-200"}
           />
-          <MiniAnalyticsStatCardV2
+          <AnalyticsStatCardMiniV2
             miniAnalyticsData={processOrderLifeCycleData(
               statusAttemptedDelivery,
               analyticsData,
@@ -155,7 +155,7 @@ export const OrderLifeCycleStats2 = ({
             boxTitle={"Attempted Delivery"}
             boxStyle={"bg-amber-100 border-amber-200"}
           />
-          <MiniAnalyticsStatCardV2
+          <AnalyticsStatCardMiniV2
             miniAnalyticsData={processOrderLifeCycleData(
               statusCancelledByBuyer,
               analyticsData,
@@ -163,7 +163,7 @@ export const OrderLifeCycleStats2 = ({
             boxTitle={"Cancelled by Buyer"}
             boxStyle={"bg-red-100 border-red-200"}
           />
-          <MiniAnalyticsStatCardV2
+          <AnalyticsStatCardMiniV2
             miniAnalyticsData={processOrderLifeCycleData(
               statusCancelledBySeller,
               analyticsData,
@@ -171,7 +171,7 @@ export const OrderLifeCycleStats2 = ({
             boxTitle={"Cancelled by Seller"}
             boxStyle={"bg-red-100 border-red-200"}
           />
-          <MiniAnalyticsStatCardV2
+          <AnalyticsStatCardMiniV2
             miniAnalyticsData={processOrderLifeCycleData(
               statusReturnRequest,
               analyticsData,
@@ -179,7 +179,7 @@ export const OrderLifeCycleStats2 = ({
             boxTitle={"Return Request"}
             boxStyle={"bg-red-100 border-red-200"}
           />
-          <MiniAnalyticsStatCardV2
+          <AnalyticsStatCardMiniV2
             miniAnalyticsData={processOrderLifeCycleData(
               statusOrderReturned,
               analyticsData,
@@ -187,7 +187,7 @@ export const OrderLifeCycleStats2 = ({
             boxTitle={"Returned"}
             boxStyle={"bg-red-100 border-red-200"}
           />
-          <MiniAnalyticsStatCardV2
+          <AnalyticsStatCardMiniV2
             miniAnalyticsData={processOrderLifeCycleData(
               statusRefundSuccess,
               analyticsData,
