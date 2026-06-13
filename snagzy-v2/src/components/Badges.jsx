@@ -54,17 +54,37 @@ export const AttributeItemBadge = ({ label, className }) => {
   );
 };
 
-export const IsActiveBadge = ({ status }) => {
+export const ProductStatusBadge = ({ productStatusId }) => {
+  const { getAllProductStatus } = useData();
+  const statusItem = getAllProductStatus().find(
+    (item) => item._id === productStatusId,
+  );
+
+  const badgeStyle = {
+    active: {
+      bg: "bg-green-100",
+      text: "text-green-700",
+      border: "border border-green-300",
+    },
+    inactive: {
+      bg: "bg-red-100",
+      text: "text-red-700",
+      border: "border border-red-300",
+    },
+  };
+
+  const badge = badgeStyle[statusItem.slug] || {
+    bg: "bg-gray-100",
+    text: "text-gray-800",
+    border: "border-gray-300",
+  };
+
   return (
     <div className="flex">
       <div
-        className={`px-2 rounded-sm text-xs font-medium ${
-          status
-            ? "bg-green-100 text-green-700 border border-green-300"
-            : "bg-red-100 text-red-700 border border-red-300"
-        }`}
+        className={`px-2 rounded-sm text-xs font-medium ${badge.bg} ${badge.text} ${badge.border}`}
       >
-        {status ? "Active" : "Inactive"}
+        {statusItem.name}
       </div>
     </div>
   );

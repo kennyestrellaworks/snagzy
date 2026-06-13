@@ -1,45 +1,34 @@
 import { IoIosArrowDown } from "./SVG";
 
-export const StoreFilter = ({
-  stores,
-  storeDropdownRef,
-  setStoreDropdownOpen,
-  selectedStoreDisplay,
-  isStoreSelected,
-  selectedStore,
-  getAllProductsOfStoreId,
-  storeDropdownOpen,
-  handleStoreChange,
+export const CategoryFilter1 = ({
+  categories,
+  categoryDropdownRef,
+  setCategoryDropdownOpen,
+  selectedCategoryDisplay,
+  isCategorySelected,
+  selectedCategory,
+  getAllProductsOfCategoryId,
+  categoryDropdownOpen,
+  handleCategoryChange,
   ariaLabel,
   visibleCountParams,
-  filteredProducts,
-  isCategorySelected,
-  isProductStatusSelected,
 }) => {
   return (
-    <div className={` flex flex-col items-start gap-1 z-50`}>
-      <div className="relative  inline-block" ref={storeDropdownRef}>
+    <div className={`w-full flex flex-col items-start gap-1 z-50`}>
+      <div className="relative w-full inline-block" ref={categoryDropdownRef}>
         <button
-          onClick={() => setStoreDropdownOpen((item) => !item)}
+          onClick={() => setCategoryDropdownOpen((item) => !item)}
           className={`p-1 rounded-sm text-sm w-64 border border-gray-400 bg-white text-left flex justify-between items-center cursor-pointer`}
           aria-label={ariaLabel}
           type="button"
         >
-          <div className="border border-gray-400 w-full px-2 py-1 rounded-sm">
+          <div className="border border-gray-400 w-full px-2 py-1 mr-1 rounded-sm">
             <div className="flex gap-1 items-center justify-between">
-              {selectedStoreDisplay}
-              {isStoreSelected && selectedStore && (
+              {selectedCategoryDisplay}
+              {isCategorySelected && selectedCategory && (
                 <div className="flex gap-1 items-center">
-                  {isCategorySelected || isProductStatusSelected ? (
-                    filteredProducts.length > visibleCountParams ? (
-                      <span className=" ml-2 text-[12px] text-gray-400">
-                        {visibleCountParams} of
-                      </span>
-                    ) : (
-                      ""
-                    )
-                  ) : getAllProductsOfStoreId(selectedStore?._id).length >
-                    visibleCountParams ? (
+                  {getAllProductsOfCategoryId(selectedCategory._id).length >
+                  visibleCountParams ? (
                     <span className=" ml-2 text-[12px] text-gray-400">
                       {visibleCountParams} of
                     </span>
@@ -47,21 +36,22 @@ export const StoreFilter = ({
                     ""
                   )}
                   <span className="text-[12px] border border-gray-400 px-1 rounded-sm">
-                    {isCategorySelected || isProductStatusSelected
-                      ? filteredProducts.length
-                      : getAllProductsOfStoreId(selectedStore._id).length}
+                    {
+                      getAllProductsOfCategoryId(selectedCategory._id).length
+                    }{" "}
                   </span>
                 </div>
               )}
             </div>
           </div>
+
           <IoIosArrowDown
             height={10}
             width={10}
-            className={`arrow-icon w-4 h-4 transition-transform duration-200 ${storeDropdownOpen ? "rotate-180" : ""}`}
+            className={`arrow-icon w-4 h-4 transition-transform duration-200 ${categoryDropdownOpen ? "rotate-180" : ""}`}
           />
         </button>
-        {storeDropdownOpen && (
+        {categoryDropdownOpen && (
           <div className={`absolute mt-1 w-64 z-50 overflow-hidden`}>
             <div
               className={`flex flex-col p-1 bg-white border border-gray-400 rounded-sm`}
@@ -69,27 +59,27 @@ export const StoreFilter = ({
               <div className={`p-2 text-sm rounded-sm cursor-pointer`}>
                 <div
                   onMouseDown={() => {
-                    handleStoreChange("");
-                    setStoreDropdownOpen(false);
+                    handleCategoryChange("");
+                    setCategoryDropdownOpen(false);
                   }}
                   className={`text-sm rounded-sm cursor-pointer text-gray-400/80`}
                 >
                   All
                 </div>
               </div>
-              {stores.map((store, index) => {
+              {categories.map((category, index) => {
                 return (
                   <div
                     key={index}
                     onMouseDown={() => {
-                      handleStoreChange(store._id);
-                      setStoreDropdownOpen(false);
+                      handleCategoryChange(category._id);
+                      setCategoryDropdownOpen(false);
                     }}
                     className={`flex justify-between bg-white hover:bg-gray-100 p-2 text-sm rounded-sm cursor-pointer`}
                   >
-                    {store.storeName}
+                    {category.name}
                     <span className="text-[12px] border border-gray-400 ml-2 px-1 rounded-sm">
-                      {getAllProductsOfStoreId(store._id).length}
+                      {getAllProductsOfCategoryId(category._id).length}
                     </span>
                   </div>
                 );

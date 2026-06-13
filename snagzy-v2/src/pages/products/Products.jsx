@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   AttributeOptionsBadge,
   CategoryItemBadge,
-  IsActiveBadge,
+  ProductStatusBadge,
   ProductIdBadge,
   StoreDetailBadge,
 } from "../../components/Badges";
@@ -15,6 +15,8 @@ import { useSearchParams } from "react-router-dom";
 import { useClickOutside } from "../../hooks/useClickOutside";
 import { StoreFilter } from "../../components/StoreFilter";
 import { CategoryFilter } from "../../components/CategoryFilter";
+import { ProductStatusFilter } from "../../components/ProductStatusFilter";
+import { GradientButton } from "../../components/GradientButton";
 
 export const Products = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -28,14 +30,18 @@ export const Products = () => {
     getProductStock,
     getAllStores,
     getAllProductsOfStoreId,
-    getAllCategories,
+    getAllParentCategories,
+    getCategoryById,
+    getAllProductsOfCategoryId,
+    getAllProductStatus,
+    getAllProductsByStatusId,
+    getProductStatusById,
   } = useData();
 
   const products = getAllProducts();
   const stores = getAllStores();
-  const categories = getAllCategories();
-  // console.log("stores", stores);
-  // console.log("categories", categories);
+  const categories = getAllParentCategories();
+  const productStatus = getAllProductStatus();
 
   const ordersAnalytics = useOrdersAnalytics();
   const { getTotalSoldItemsOfAProduct, getTotalSalesOfAProduct } =
@@ -46,12 +52,25 @@ export const Products = () => {
 
   // Filter open state //////////////////
   const [storeDropdownOpen, setStoreDropdownOpen] = useState(false);
+  const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
+  const [productStatusDropdownOpen, setProductStatusDropdownOpen] =
+    useState(false);
 
   // Filter searchParams //////////////////
 
   // Store params
   const initialStoreParams = searchParams.get("store") || "";
   const [storeParams, setStoreParams] = useState(initialStoreParams);
+
+  // Category params
+  const initialCategoryParams = searchParams.get("category") || "";
+  const [categoryParams, setCategoryParams] = useState(initialCategoryParams);
+
+  // Product status params
+  const initialProductStatusParams = searchParams.get("product_status") || "";
+  const [productStatusParams, setProductStatusParams] = useState(
+    initialProductStatusParams,
+  );
 
   // Visible count params
   const initialVisibleCountParams = parseInt(
@@ -61,7 +80,7 @@ export const Products = () => {
     initialVisibleCountParams,
   );
 
-  // Filter store status change //////////////////
+  // Filter store change //////////////////
   const handleStoreChange = (storeId) => {
     const storeItem = getStoreById(storeId);
     const val = storeItem?.storeName || "";
@@ -69,15 +88,49 @@ export const Products = () => {
 
     const params = {};
     if (val) params.store = val;
+    if (categoryParams) params.category = categoryParams;
+    if (productStatusParams) params.product_status = productStatusParams;
+    setSearchParams(params);
+  };
+
+  // Filter category change //////////////////
+  const handleCategoryChange = (categoryId) => {
+    const categoryItem = getCategoryById(categoryId);
+    const val = categoryItem?.name || "";
+    setCategoryParams(val);
+
+    const params = {};
+    if (val) params.category = val;
+    if (storeParams) params.store = storeParams;
+    if (productStatusParams) params.product_status = productStatusParams;
+    setSearchParams(params);
+  };
+
+  // Filter product status change //////////////////
+  const handleProductStatusChange = (statusId) => {
+    const productStatusItem = getProductStatusById(statusId);
+    const val = productStatusItem?.slug || "";
+    setProductStatusParams(val);
+
+    const params = {};
+    if (val) params.product_status = val;
+    if (storeParams) params.store = storeParams;
+    if (categoryParams) params.category = categoryParams;
     setSearchParams(params);
   };
 
   useEffect(() => {
     const urlStore = searchParams.get("store") || "";
+    const urlCategory = searchParams.get("category") || "";
+    const urlProductStatus = searchParams.get("product_status") || "";
     const urlVisibleCount =
       parseInt(searchParams.get("visible_count")) || count;
 
     if (urlStore !== storeParams) setStoreParams(urlStore);
+    if (urlCategory !== categoryParams) setCategoryParams(urlCategory);
+    if (urlProductStatus !== productStatusParams)
+      setProductStatusParams(urlProductStatus);
+
     setVisibleCountParams(urlVisibleCount);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -86,8 +139,14 @@ export const Products = () => {
   // Close all dropdowns if click is outside any dropdown
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (!event.target.closest('[aria-label="store-filter"]')) {
+      if (
+        !event.target.closest('[aria-label="store-filter"]') &&
+        !event.target.closest('[aria-label="category-filter"]') &&
+        !event.target.closest('[aria-label="product-status-filter"]')
+      ) {
         setStoreDropdownOpen(false);
+        setCategoryDropdownOpen(false);
+        setProductStatusDropdownOpen(false);
       }
     };
 
@@ -99,16 +158,39 @@ export const Products = () => {
 
   // Filter dropdown refs
   const storeDropdownRef = useRef(null);
+  const categoryDropdownRef = useRef(null);
+  const productStatusDropdownRef = useRef(null);
 
   // Filter click outside using hook.
   useClickOutside(storeDropdownRef, () => setStoreDropdownOpen(false));
+  useClickOutside(categoryDropdownRef, () => setCategoryDropdownOpen(false));
+  useClickOutside(productStatusDropdownRef, () =>
+    setProductStatusDropdownOpen(false),
+  );
 
-  // Filter get selected payment status item
+  // Filter get selected item
+
+  // Selected store
   const selectedStore = (stores || []).find(
     (item) => item?.storeName === storeParams,
   );
   const selectedStoreDisplay = selectedStore?.storeName || "Store";
   const isStoreSelected = !!storeParams;
+
+  // Selected category
+  const selectedCategory = (categories || []).find(
+    (item) => item?.name === categoryParams,
+  );
+  const selectedCategoryDisplay = selectedCategory?.name || "Product Category";
+  const isCategorySelected = !!categoryParams;
+
+  // Selected product status
+  const selectedProductStatus = productStatus.find(
+    (item) => item?.slug === productStatusParams,
+  );
+  const selectedProductStatusDisplay =
+    selectedProductStatus?.name || "Product Status";
+  const isProductStatusSelected = !!productStatusParams;
 
   const filteredProducts = useMemo(() => {
     let result = products || [];
@@ -118,13 +200,26 @@ export const Products = () => {
       result = result.filter(
         (item) => (item.storeOwnerInfo?.storeId || "") === selectedStore._id,
       );
-    } else if (storeParams) {
-      // store param set but no matching store -> show no results
-      result = [];
+    }
+
+    // Filter by selected category
+    if (selectedCategory) {
+      result = result.filter(
+        (product) =>
+          Array.isArray(product.categories) &&
+          product.categories.some((catId) => catId === selectedCategory._id),
+      );
+    }
+
+    // Filter by product status
+    if (selectedProductStatus) {
+      result = result.filter(
+        (item) => (item.status || "") === selectedProductStatus._id,
+      );
     }
 
     return result;
-  }, [products, selectedStore, storeParams]);
+  }, [products, selectedStore, selectedCategory, selectedProductStatus]);
 
   const displayedProducts = useMemo(() => {
     return (filteredProducts || []).slice(0, visibleCountParams);
@@ -133,8 +228,12 @@ export const Products = () => {
   const loadMore = () => {
     const updateUrlParams = (newCount) => {
       const params = {};
+
       if (storeParams) params.store = storeParams;
+      if (categoryParams) params.category = categoryParams;
+      if (productStatusParams) params.product_status = productStatusParams;
       params.visible_count = newCount;
+
       setSearchParams(params);
     };
 
@@ -166,9 +265,48 @@ export const Products = () => {
               getAllProductsOfStoreId={getAllProductsOfStoreId}
               storeDropdownOpen={storeDropdownOpen}
               handleStoreChange={handleStoreChange}
+              ariaLabel="store-filter"
+              filteredProducts={filteredProducts}
+              visibleCountParams={visibleCountParams}
+              isCategorySelected={isCategorySelected}
+              isProductStatusSelected={isProductStatusSelected}
             />
             {/* Store filter ends  */}
-            <CategoryFilter categories={categories} />
+            <CategoryFilter
+              categories={categories}
+              categoryDropdownRef={categoryDropdownRef}
+              setCategoryDropdownOpen={setCategoryDropdownOpen}
+              selectedCategoryDisplay={selectedCategoryDisplay}
+              isCategorySelected={isCategorySelected}
+              selectedCategory={selectedCategory}
+              getAllProductsOfCategoryId={getAllProductsOfCategoryId}
+              categoryDropdownOpen={categoryDropdownOpen}
+              handleCategoryChange={handleCategoryChange}
+              ariaLabel="category-filter"
+              filteredProducts={filteredProducts}
+              visibleCountParams={visibleCountParams}
+              isStoreSelected={isStoreSelected}
+              isProductStatusSelected={isProductStatusSelected}
+            />
+            {/* Product status filter  */}
+            <ProductStatusFilter
+              productStatus={productStatus}
+              productStatusDropdownRef={productStatusDropdownRef}
+              setProductStatusDropdownOpen={setProductStatusDropdownOpen}
+              selectedProductStatusDisplay={selectedProductStatusDisplay}
+              isProductStatusSelected={isProductStatusSelected}
+              selectedProductStatus={selectedProductStatus}
+              getAllProductsByStatusId={getAllProductsByStatusId}
+              productStatusDropdownOpen={productStatusDropdownOpen}
+              handleProductStatusChange={handleProductStatusChange}
+              ariaLabel="product-status-filter"
+              filteredProducts={filteredProducts}
+              visibleCountParams={visibleCountParams}
+              isStoreSelected={isStoreSelected}
+              isCategorySelected={isCategorySelected}
+            />
+            {/* Product status filter ends  */}
+            <GradientButton buttonName={"Clear Filters"} />
           </div>
         </div>
       </div>
@@ -243,10 +381,14 @@ export const Products = () => {
                   product._id,
                 )?.length;
 
+                const statusItem = productStatus.find(
+                  (item) => item._id === product.status,
+                );
+
                 return (
                   <div
                     key={index}
-                    className={`grid grid-cols-[3.8fr_1.5fr_1.6fr_2fr_.7fr_1.2fr_1fr_.6fr_.8fr_.7fr_.3fr] border-b border-gray-300 last:border-b-0 bg-white text-sm ${product.isActive ? "" : "opacity-40"}`}
+                    className={`grid grid-cols-[3.8fr_1.5fr_1.6fr_2fr_.7fr_1.2fr_1fr_.6fr_.8fr_.7fr_.3fr] border-b border-gray-300 bg-white text-sm ${statusItem.slug === "active" ? "" : "opacity-40"}`}
                   >
                     {/* Product box  */}
                     <div className="flex p-2 border-r border-gray-300 h-full">
@@ -312,7 +454,7 @@ export const Products = () => {
                     <div className="flex p-2 border-r border-gray-300 h-full">
                       <p className="text-xs">
                         {(product.variants || []).length === 0 ? (
-                          <p className="text-gray-400">NA</p>
+                          <span className="text-gray-400">NA</span>
                         ) : (
                           (product.variants || []).length
                         )}
@@ -346,7 +488,7 @@ export const Products = () => {
                     {/* Status box  */}
                     <div className="flex p-2 border-r border-gray-300 h-full">
                       <div className="flex items-start text-xs">
-                        <IsActiveBadge status={product.isActive} />
+                        <ProductStatusBadge productStatusId={product.status} />
                       </div>
                     </div>
                     {/* Stock box  */}
@@ -362,7 +504,7 @@ export const Products = () => {
                       <div className="flex flex-col">
                         <p className="text-gray-600">
                           {totalSoldItems === 0 ? (
-                            <p className="text-gray-400">NA</p>
+                            <span className="text-gray-400">NA</span>
                           ) : totalSoldItems === 1 ? (
                             `${totalSoldItems} item`
                           ) : (
@@ -394,19 +536,21 @@ export const Products = () => {
               })}
             </div>
           )}
-          {visibleCountParams <
-            (filteredProducts.length || products.length) && (
-            <div className="flex items-center justify-center border-t border-gray-300">
-              <div className="flex p-2">
-                <button
-                  onClick={loadMore}
-                  className="px-3 py-1 border border-gray-400 bg-gray-100 text-sm text-gray-500 rounded cursor-pointer hover:border-gray-600 hover:bg-gray-300 hover:text-gray-900 transition-transform duration-200 ease-out"
-                >
-                  Load more
-                </button>
+          {filteredProducts.length > 0 &&
+            products.length > 0 &&
+            visibleCountParams <
+              (filteredProducts.length || products.length) && (
+              <div className="flex items-center justify-center">
+                <div className="flex p-2">
+                  <button
+                    onClick={loadMore}
+                    className="px-3 py-1 border border-gray-400 bg-gray-100 text-sm text-gray-500 rounded cursor-pointer hover:border-gray-600 hover:bg-gray-300 hover:text-gray-900 transition-transform duration-200 ease-out"
+                  >
+                    Load more
+                  </button>
+                </div>
               </div>
-            </div>
-          )}
+            )}
         </div>
       </div>
       {/* List area ends  */}

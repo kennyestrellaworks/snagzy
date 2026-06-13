@@ -1,6 +1,6 @@
 import { IoIosArrowDown } from "./SVG";
 
-export const StoreFilter = ({
+export const StoreFilter1 = ({
   stores,
   storeDropdownRef,
   setStoreDropdownOpen,
@@ -11,35 +11,33 @@ export const StoreFilter = ({
   storeDropdownOpen,
   handleStoreChange,
   ariaLabel,
+  //   displayedProducts,
   visibleCountParams,
-  filteredProducts,
-  isCategorySelected,
-  isProductStatusSelected,
 }) => {
+  //   console.log("displayedProducts ddd", displayedProducts);
+  //   console.log("selectedStore ddd", selectedStore._id);
+  //   const filteredProducts = (storeId) => {
+  //     return displayedProducts.filter(
+  //       (product) => product.storeOwnerInfo.storeId === storeId,
+  //     );
+  //   };
+
   return (
-    <div className={` flex flex-col items-start gap-1 z-50`}>
-      <div className="relative  inline-block" ref={storeDropdownRef}>
+    <div className={`w-full flex flex-col items-start gap-1 z-50`}>
+      <div className="relative w-full inline-block" ref={storeDropdownRef}>
         <button
           onClick={() => setStoreDropdownOpen((item) => !item)}
           className={`p-1 rounded-sm text-sm w-64 border border-gray-400 bg-white text-left flex justify-between items-center cursor-pointer`}
           aria-label={ariaLabel}
           type="button"
         >
-          <div className="border border-gray-400 w-full px-2 py-1 rounded-sm">
+          <div className="border border-gray-400 w-full px-2 py-1 mr-1 rounded-sm">
             <div className="flex gap-1 items-center justify-between">
               {selectedStoreDisplay}
               {isStoreSelected && selectedStore && (
                 <div className="flex gap-1 items-center">
-                  {isCategorySelected || isProductStatusSelected ? (
-                    filteredProducts.length > visibleCountParams ? (
-                      <span className=" ml-2 text-[12px] text-gray-400">
-                        {visibleCountParams} of
-                      </span>
-                    ) : (
-                      ""
-                    )
-                  ) : getAllProductsOfStoreId(selectedStore?._id).length >
-                    visibleCountParams ? (
+                  {getAllProductsOfStoreId(selectedStore._id).length >
+                  visibleCountParams ? (
                     <span className=" ml-2 text-[12px] text-gray-400">
                       {visibleCountParams} of
                     </span>
@@ -47,9 +45,7 @@ export const StoreFilter = ({
                     ""
                   )}
                   <span className="text-[12px] border border-gray-400 px-1 rounded-sm">
-                    {isCategorySelected || isProductStatusSelected
-                      ? filteredProducts.length
-                      : getAllProductsOfStoreId(selectedStore._id).length}
+                    {getAllProductsOfStoreId(selectedStore._id).length}{" "}
                   </span>
                 </div>
               )}
