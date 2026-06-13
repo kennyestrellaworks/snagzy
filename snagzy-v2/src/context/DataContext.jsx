@@ -7,6 +7,7 @@ import { categories } from "../data/categories.js";
 import { attributes } from "../data/attributes.js";
 import { sidebarNavLinks } from "../data/navLinks.js";
 import { empty } from "../data/empty.js";
+import { productStatus } from "../data/productStatus.js";
 
 const DataContext = createContext();
 
@@ -15,6 +16,7 @@ export const DataProvider = ({ children }) => {
   const getEmpty = () => {
     return empty;
   };
+
   // Attributes /////////////////////////
   // Get all attributes.
   const getAllAttributes = () => {
@@ -32,6 +34,25 @@ export const DataProvider = ({ children }) => {
     return categoryId
       .map((catId) => getAllCategories().find((cat) => cat._id === catId)?.name)
       .filter((name) => name); // remove undefined
+  };
+  // Get category by category id.
+  const getCategoryById = (categoryId) => {
+    return getAllCategories().find((category) => category._id === categoryId);
+  };
+  // Get products by category id.
+  const getAllProductsOfCategoryId = (categoryId) => {
+    if (!categoryId) return [];
+    return getAllProducts().filter(
+      (product) =>
+        Array.isArray(product.categories) &&
+        product.categories.some((catId) => catId === categoryId),
+    );
+  };
+  // Get categorys with type parent.
+  const getAllParentCategories = () => {
+    return getAllCategories().filter(
+      (categoryType) => categoryType.type === "parent",
+    );
   };
 
   // Stores //////////////////////////
@@ -60,16 +81,30 @@ export const DataProvider = ({ children }) => {
     const max = Math.max(...prices);
     return { min, max };
   };
+  // Get product stock by passing variants object.
   const getProductStock = (variants) => {
     if (!Array.isArray(variants)) return 0;
     return (variants || [])
       .filter((v) => v.isActive === true)
       .reduce((sum, v) => sum + (v.stock || 0), 0);
   };
+  // Get all products using store id.
   const getAllProductsOfStoreId = (storeId) => {
     return getAllProducts().filter(
       (product) => product.storeOwnerInfo.storeId === storeId,
     );
+  };
+  // Get all product status options
+  const getAllProductStatus = () => {
+    return productStatus;
+  };
+  // Get a product status option by product status id.
+  const getProductStatusById = (productStatusId) => {
+    return getAllProductStatus().find((item) => item._id === productStatusId);
+  };
+  // Get all products by passing product stats property.
+  const getAllProductsByStatusId = (productStatusId) => {
+    return getAllProducts().filter((item) => item.status === productStatusId);
   };
 
   // Users //////////////////////////
@@ -145,9 +180,15 @@ export const DataProvider = ({ children }) => {
   return (
     <DataContext.Provider
       value={{
+        getAllProductStatus,
+        getProductStatusById,
+        getAllProductsByStatusId,
         getAllAttributes,
         getAllCategories,
         getCategoryNames,
+        getCategoryById,
+        getAllProductsOfCategoryId,
+        getAllParentCategories,
         getAllStores,
         getStoreById,
         getAllProducts,

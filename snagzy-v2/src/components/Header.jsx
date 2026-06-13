@@ -8,7 +8,7 @@ export const Header = () => {
   const loggedInUser = getUserById("people43210987nopqrstu");
 
   return (
-    <header className="sticky w-full top-0 z-50 bg-white border-b border-gray-200 p-2">
+    <header className="sticky w-full top-0 z-60 bg-white border-b border-gray-200 p-2">
       <div className="flex w-full h-10 items-center justify-between">
         <div className="flex">
           <h1 className="text-sm">Agent View</h1>
