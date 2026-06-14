@@ -12,13 +12,15 @@ export const TopAnalyticsProvider = ({ children }) => {
     // Method to get top selling products based on a status array and limit
     const getTopSellingProductsByOrderLifeCycle = (
       orders,
-      statusArray,
+      orderCurrentStatus,
       limit,
     ) => {
+      // console.log("orderCurrentStatus", typeof orderCurrentStatus);
+
       const productMap = orders.reduce((acc, order) => {
         const currentStatus = order.currentStatus?.slug;
 
-        if (statusArray.includes(currentStatus)) {
+        if (orderCurrentStatus.includes(currentStatus)) {
           order.orderedItems?.forEach((item) => {
             const productId = item.productId;
             const quantitySold = item.variant?.quantity || 0;
@@ -43,16 +45,20 @@ export const TopAnalyticsProvider = ({ children }) => {
       }, {});
 
       return Object.values(productMap)
-        .sort((a, b) => b.totalQuantitySold - a.totalQuantitySold)
+        .sort((a, b) => b.totalRevenue - a.totalRevenue)
         .slice(0, limit);
     };
 
     // Method to get top buyers based on a status array and limit
-    const getTopBuyersByOrderLifeCycle = (orders, statusArray, limit) => {
+    const getTopBuyersByOrderLifeCycle = (
+      orders,
+      orderCurrentStatus,
+      limit,
+    ) => {
       const buyerMap = orders.reduce((acc, order) => {
         const currentStatus = order.currentStatus?.slug;
 
-        if (statusArray.includes(currentStatus)) {
+        if (orderCurrentStatus.includes(currentStatus)) {
           const buyer = order.buyerInfo;
           const buyerId = buyer?.buyerId;
           const orderTotalPrice = order.summary?.orderTotalPrice || 0;
@@ -89,11 +95,15 @@ export const TopAnalyticsProvider = ({ children }) => {
     };
 
     // Method to get data by stepping down into item variant environments
-    const getTopStoresByOrderLifeCycle = (orders, statusArray, limit) => {
+    const getTopStoresByOrderLifeCycle = (
+      orders,
+      orderCurrentStatus,
+      limit,
+    ) => {
       const storeMap = orders.reduce((acc, order) => {
         const currentStatus = order.currentStatus?.slug;
 
-        if (statusArray.includes(currentStatus)) {
+        if (orderCurrentStatus.includes(currentStatus)) {
           order.orderedItems?.forEach((item) => {
             const store = item.variant?.storeInfo;
             const storeId = store?.storeId;

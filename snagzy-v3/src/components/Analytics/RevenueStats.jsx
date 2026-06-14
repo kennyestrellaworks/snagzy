@@ -13,10 +13,11 @@ import {
   pendingOrderStatuses,
   unsuccessfulOrderStatuses,
 } from "../../data/orderLifeCycle";
-import { RevenueOverTimeChart } from "./RevenueOverTimeChart"; // assuming you extract chart too, but it's already inside
-// If you keep the chart inline, import nothing extra; otherwise extract similarly.
+import { RevenueOverTimeChart } from "./RevenueOverTimeChart";
 import { DisplayedOrders } from "./DisplayedOrders";
 import { useLocation } from "react-router-dom";
+import { TopByNumberStats } from "./TopByNumberStats";
+import { getButtonClasses } from "../../utils/helpers";
 
 const ITEM_INCREMENT = 2;
 
@@ -33,9 +34,15 @@ export const RevenueStats = ({
   setItemsLimits,
   defaultItemsCount = 3,
   count = 6,
+  // Top limits (from URL via parent)
+  revenueTopProducts = 5,
+  onRevenueTopProductsChange,
+  revenueTopBuyers = 5,
+  onRevenueTopBuyersChange,
+  revenueTopStores = 5,
+  onRevenueTopStoresChange,
 }) => {
   const [revenueStatsOpen, setRevenueStatsOpen] = useState(true);
-  // const [reveueStatsViewMode, setReveueStatsViewMode] = useState("list");
   const { sumOrderQuantities, getAllAttributes } = useData();
   const attributes = getAllAttributes();
   const location = useLocation();
@@ -65,13 +72,13 @@ export const RevenueStats = ({
   const tableHeaderBg = useMemo(() => {
     switch (activeRevenueTab) {
       case "total-sales":
-        return "#7BF1A8";
+        return "#22c55e";
       case "pending-sales":
-        return "#FFD230";
+        return "#fbbf24";
       case "cancellations":
-        return "#F8A5A5";
+        return "#ef4444";
       default:
-        return "#7BF1A8";
+        return "#22c55e";
     }
   }, [activeRevenueTab]);
 
@@ -105,17 +112,6 @@ export const RevenueStats = ({
     });
   };
 
-  const getButtonClasses = (isActive, isDisabled) => {
-    const base = "flex rounded text-[12px] px-3 py-1 transition-colors";
-    const modeClass = isActive
-      ? "bg-gray-200 text-gray-700"
-      : "bg-gray-100 text-gray-400";
-    const interactiveClass = isDisabled
-      ? "cursor-not-allowed"
-      : "hover:bg-gray-200 cursor-pointer";
-    return `${base} ${modeClass} ${interactiveClass}`;
-  };
-
   return (
     <div className="flex flex-col w-full">
       <div
@@ -127,6 +123,17 @@ export const RevenueStats = ({
           </div>
           <div className="flex border-gray-300 items-center">
             <div className="flex gap-2">
+              <button
+                className={getButtonClasses(
+                  revenueStatsView === "ranking",
+                  !revenueStatsOpen,
+                )}
+                onClick={() => onRevenueStatsViewChange("ranking")}
+                disabled={!revenueStatsOpen}
+              >
+                RANKING
+              </button>
+
               <button
                 className={getButtonClasses(
                   revenueStatsView === "list",
@@ -233,6 +240,19 @@ export const RevenueStats = ({
                 attributes={attributes}
                 location={location}
                 sumOrderQuantities={sumOrderQuantities}
+              />
+            )}
+
+            {revenueStatsView === "ranking" && (
+              <TopByNumberStats
+                analyticsData={analyticsData}
+                topLimitProducts={revenueTopProducts}
+                setTopLimitProducts={onRevenueTopProductsChange}
+                topLimitBuyers={revenueTopBuyers}
+                setTopLimitBuyers={onRevenueTopBuyersChange}
+                topLimitStores={revenueTopStores}
+                setTopLimitStores={onRevenueTopStoresChange}
+                activeOrderLifeCycleTab={activeRevenueTab}
               />
             )}
           </>

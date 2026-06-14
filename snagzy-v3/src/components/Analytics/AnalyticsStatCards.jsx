@@ -1,6 +1,5 @@
 import { amountToDecimal, formatWithCommas } from "../../utils/helpers";
 import { AmountFormat } from "../AmountFormat";
-import { DollarSign } from "../SVG";
 
 export const AnalyticsStatCardMini = ({
   miniAnalyticsData,
@@ -49,6 +48,7 @@ export const AnalyticsStatCardMiniV2 = ({
   miniAnalyticsData,
   boxTitle,
   boxStyle,
+  activeOrderLifeCycleTab,
 }) => {
   const { ordersToProcess, sumOfTotalPrices, sumOfAllQuantities } =
     miniAnalyticsData;
