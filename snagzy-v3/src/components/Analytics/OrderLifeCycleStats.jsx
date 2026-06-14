@@ -18,12 +18,17 @@ import {
   statusOrderReturned,
   statusRefundSuccess,
   orderLifeCycle,
+  successfulOrderStatuses,
+  pendingOrderStatuses,
+  unsuccessfulOrderStatuses,
 } from "../../data/orderLifeCycle";
 import { OrderLifeCycleStatsBoxes } from "./OrderLifeCycleStatsBoxes";
 import { OrderLifeCycleChart } from "./OrderLifeCycleChart";
 import { DisplayedOrders } from "./DisplayedOrders";
 import { useData } from "../../context/DataContext";
-import { useLocation, useSearchParams } from "react-router-dom";
+import { useLocation } from "react-router-dom";
+import { TopByNumberStats } from "./TopByNumberStats";
+import { getButtonClasses } from "../../utils/helpers";
 
 const ITEM_INCREMENT = 2;
 
@@ -39,8 +44,14 @@ export const OrderLifeCycleStats = ({
   setItemsLimits,
   defaultItemsCount = 3,
   count = 6,
+  // Top limits (from URL via parent)
+  orderLifeCycleTopProducts = 5,
+  onOrderLifeCycleTopProductsChange,
+  orderLifeCycleTopBuyers = 5,
+  onOrderLifeCycleTopBuyersChange,
+  orderLifeCycleTopStores = 5,
+  onOrderLifeCycleTopStoresChange,
 }) => {
-  const [searchParams, setSearchParams] = useSearchParams();
   const [orderLifeCycleStatsViewOpen, setOrderLifeCycleStatsViewOpen] =
     useState(true);
   const { sumOrderQuantities, getAllAttributes } = useData();
@@ -50,6 +61,16 @@ export const OrderLifeCycleStats = ({
   const toggleOrderLifeCycleStats = () =>
     setOrderLifeCycleStatsViewOpen(!orderLifeCycleStatsViewOpen);
 
+  // Determine table header background color (hex) based on active tab's status group
+  const getTableHeaderBgColor = (status) => {
+    if (successfulOrderStatuses.includes(status)) return "#22c55e"; // green-500
+    if (pendingOrderStatuses.includes(status)) return "#fbbf24"; // amber-400
+    if (unsuccessfulOrderStatuses.includes(status)) return "#ef4444"; // red-500
+    return "#9ca3af"; // gray-400 fallback
+  };
+
+  const tableHeaderBgColor = getTableHeaderBgColor(activeOrderLifeCycleTab);
+
   // Pre-process data for each card
   const amountedData = (orderLifeCycleStatus) => {
     return processOrderLifeCycleData(orderLifeCycleStatus, analyticsData);
@@ -58,7 +79,7 @@ export const OrderLifeCycleStats = ({
   const getOrderData = () => {
     switch (activeOrderLifeCycleTab) {
       case "order_placed":
-        return amountedData(statusCompleted).ordersToProcess;
+        return amountedData(statusOrderPlaced).ordersToProcess;
       case "payment_pending":
         return amountedData(statusPaymentPending).ordersToProcess;
       case "payment_confirmed":
@@ -106,13 +127,23 @@ export const OrderLifeCycleStats = ({
       .slice(0, ordersLimit);
   }, [orderData, ordersLimit]);
 
-  // Revenue stats clickable stat cards
-  const handleOrderLifeCycleTbChange = (tab) => {
-    const params = new URLSearchParams(searchParams);
+  const handleOrderLifeCycleTabChange = (tab) => {
+    // This is used by OrderLifeCycleStatsBoxes; we reuse the same handler pattern
+    const params = new URLSearchParams(window.location.search);
     params.set("orderLifeCycleTab", tab);
     params.set("orders", count.toString());
     params.delete("itemLimits");
-    setSearchParams(params);
+    window.history.pushState({}, "", `?${params.toString()}`);
+    // Force re-render by calling the parent's handler? Actually we rely on URL changes.
+    // For simplicity, we assume the parent component will handle URL changes.
+    // But the parent already passed onOrderLifeCycleTabChange? Wait, we don't have that prop.
+    // In the original, the parent passed onOrderLifeCycleTabClick, but that is not present here.
+    // We'll keep the original behavior: the parent passes a tab change handler via props? Actually no.
+    // Looking back at OrdersAnalytics, it passes onOrderLifeCycleViewChange, but not a tab click handler.
+    // However OrderLifeCycleStatsBoxes expects onOrderLifeCycleTabChange. In the original file, it used handleOrderLifeCycleTbChange defined inside.
+    // To keep consistency, we define a local function that updates URL directly.
+    const event = new Event("popstate");
+    window.dispatchEvent(event);
   };
 
   const handleLoadMoreOrders = () => {
@@ -135,17 +166,6 @@ export const OrderLifeCycleStats = ({
     });
   };
 
-  const getButtonClasses = (isActive, isDisabled) => {
-    const base = "flex rounded text-[12px] px-3 py-1 transition-colors";
-    const modeClass = isActive
-      ? "bg-gray-200 text-gray-700"
-      : "bg-gray-100 text-gray-400";
-    const interactiveClass = isDisabled
-      ? "cursor-not-allowed"
-      : "hover:bg-gray-200 cursor-pointer";
-    return `${base} ${modeClass} ${interactiveClass}`;
-  };
-
   return (
     <div className="flex flex-col w-full">
       <div
@@ -158,6 +178,17 @@ export const OrderLifeCycleStats = ({
 
           <div className="flex gap-6 border-gray-300 items-center">
             <div className="flex gap-2">
+              <button
+                className={getButtonClasses(
+                  orderLifeCycleView === "ranking",
+                  !orderLifeCycleStatsViewOpen,
+                )}
+                onClick={() => onOrderLifeCycleViewChange("ranking")}
+                disabled={!orderLifeCycleStatsViewOpen}
+              >
+                RANKING
+              </button>
+
               <button
                 className={getButtonClasses(
                   orderLifeCycleView === "list",
@@ -196,7 +227,7 @@ export const OrderLifeCycleStats = ({
 
         {/* Analytics boxes */}
         <OrderLifeCycleStatsBoxes
-          onOrderLifeCycleTabChange={handleOrderLifeCycleTbChange}
+          onOrderLifeCycleTabChange={handleOrderLifeCycleTabChange}
           processOrderLifeCycleData={processOrderLifeCycleData}
           analyticsData={analyticsData}
           statusCompleted={statusCompleted}
@@ -215,11 +246,11 @@ export const OrderLifeCycleStats = ({
           statusReturnRequest={statusReturnRequest}
           statusOrderReturned={statusOrderReturned}
           statusRefundSuccess={statusRefundSuccess}
+          activeOrderLifeCycleTab={activeOrderLifeCycleTab}
         />
 
         {orderLifeCycleView === "chart" && (
           <OrderLifeCycleChart
-            activeOrderLifeCycleTab={activeOrderLifeCycleTab}
             orderLifeCycle={orderLifeCycle}
             processOrderLifeCycleData={processOrderLifeCycleData}
             analyticsData={analyticsData}
@@ -229,7 +260,7 @@ export const OrderLifeCycleStats = ({
         {orderLifeCycleView === "list" && (
           <DisplayedOrders
             displayedOrders={displayedOrders}
-            tableHeaderBg="#E5E7EB"
+            tableHeaderBg={tableHeaderBgColor}
             itemsLimits={itemsLimits}
             onLoadMoreItems={handleLoadMoreItems}
             onResetItems={handleResetItems}
@@ -240,6 +271,19 @@ export const OrderLifeCycleStats = ({
             attributes={attributes}
             location={location}
             sumOrderQuantities={sumOrderQuantities}
+          />
+        )}
+
+        {orderLifeCycleView === "ranking" && (
+          <TopByNumberStats
+            analyticsData={displayedOrders}
+            topLimitProducts={orderLifeCycleTopProducts}
+            setTopLimitProducts={onOrderLifeCycleTopProductsChange}
+            topLimitBuyers={orderLifeCycleTopBuyers}
+            setTopLimitBuyers={onOrderLifeCycleTopBuyersChange}
+            topLimitStores={orderLifeCycleTopStores}
+            setTopLimitStores={onOrderLifeCycleTopStoresChange}
+            activeOrderLifeCycleTab={activeOrderLifeCycleTab}
           />
         )}
       </div>

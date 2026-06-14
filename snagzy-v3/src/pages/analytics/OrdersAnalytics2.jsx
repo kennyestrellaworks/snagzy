@@ -5,14 +5,14 @@ import { useData } from "../../context/DataContext";
 import { RevenueStats } from "../../components/Analytics/RevenueStats";
 import { OrderLifeCycleStats } from "../../components/Analytics/OrderLifeCycleStats";
 
-export const OrdersAnalytics = () => {
+export const OrdersAnalytics2 = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { ordersAnalyticsValue } = useOrdersAnalytics();
   const { getAllOrders } = useData();
 
   const count = 6;
+
   const ITEMS_COUNT = 3;
-  const DEFAULT_VIEW = "list"; // Centralized default view
 
   // Helper functions to serialize/deserialize item limits for the URL
   const serializeItemLimits = (limitsObj) => {
@@ -41,53 +41,36 @@ export const OrdersAnalytics = () => {
   const selectedDay = searchParams.get("day") || "all";
 
   const urlOrders = parseInt(searchParams.get("orders") || "0");
+
   const urlRevenueTab = searchParams.get("revenueTab");
   const urlOrderLifeCycleTab = searchParams.get("orderLifeCycleTab");
+
   const urlItemLimits = searchParams.get("itemLimits");
 
-  // ----- Top limits for Revenue Stats (URL persistence) -----
-  const urlRevenueTopProducts = parseInt(
-    searchParams.get("revenueTopProducts") || "5",
-  );
-  const urlRevenueTopBuyers = parseInt(
-    searchParams.get("revenueTopBuyers") || "5",
-  );
-  const urlRevenueTopStores = parseInt(
-    searchParams.get("revenueTopStores") || "5",
-  );
-
-  // ----- Top limits for Order Life Cycle Stats -----
-  const urlOrderLifeCycleTopProducts = parseInt(
-    searchParams.get("orderLifeCycleTopProducts") || "5",
-  );
-  const urlOrderLifeCycleTopBuyers = parseInt(
-    searchParams.get("orderLifeCycleTopBuyers") || "5",
-  );
-  const urlOrderLifeCycleTopStores = parseInt(
-    searchParams.get("orderLifeCycleTopStores") || "5",
-  );
-
-  // ----- DYNAMIC VIEW HANDLING -----
+  const urlRevenueStatsView = searchParams.get("revenueStatsView");
   const revenueStatsViewParams =
-    searchParams.get("revenueStatsView") ?? DEFAULT_VIEW;
+    urlRevenueStatsView === "chart" ? "chart" : "list";
+  const urlorderLifeCycleView = searchParams.get("orderLifeCycleView");
   const orderLifeCycleViewParams =
-    searchParams.get("orderLifeCycleView") ?? DEFAULT_VIEW;
+    urlorderLifeCycleView === "chart" ? "chart" : "list";
 
-  // Derive value settings directly from URL
+  // Derive value settings directly from URL instead of local state hooks
   const ordersParams = urlOrders || count;
-  const itemsLimitsParams = useMemo(
-    () => deserializeItemLimits(urlItemLimits),
-    [urlItemLimits],
-  );
 
-  // Single Source of truth for tab selections
+  const itemsLimitsParams = useMemo(() => {
+    return deserializeItemLimits(urlItemLimits);
+  }, [urlItemLimits]);
+
+  // Single Source of truth derived directly from URL for the tab selection
   const activeRevenueTab = useMemo(() => {
+    // urlRevenueTab = "total-sales", "pending-sales", "cancellations"
     return urlRevenueTab &&
       ["total-sales", "pending-sales", "cancellations"].includes(urlRevenueTab)
       ? urlRevenueTab
       : "total-sales";
   }, [urlRevenueTab]);
 
+  // Single Source of truth derived directly from URL for the tab selection
   const activeOrderLifeCycleTab = useMemo(() => {
     return urlOrderLifeCycleTab &&
       [
@@ -102,6 +85,7 @@ export const OrdersAnalytics = () => {
         "out_for_delivery",
         "delivery_failed",
         "attempted_delivery",
+        "cancelled_by_buyer",
         "cancelled_by_buyer",
         "cancelled_by_seller",
         "return_request",
@@ -175,10 +159,27 @@ export const OrdersAnalytics = () => {
     return { ordersToProcess, sumOfTotalPrices, sumOfAllQuantities };
   };
 
-  // ----- VIEW CHANGE HANDLERS -----
+  // Revenue stats clickable stat cards
+  const handleRevenueTabChange = (tab) => {
+    const params = new URLSearchParams(searchParams);
+    params.set("revenueTab", tab);
+    params.set("orders", count.toString());
+    params.delete("itemLimits");
+    setSearchParams(params);
+  };
+
+  // Order life cycle clickable start cards
+  const handleOrderLifeCycleTabChange = (tab) => {
+    const params = new URLSearchParams(searchParams);
+    params.set("orderLifeCycleTab", tab);
+    params.set("orders", count.toString());
+    params.delete("itemLimits");
+    setSearchParams(params);
+  };
+
   const handleRevenueStatsViewChange = (view) => {
     const params = new URLSearchParams(searchParams);
-    if (view === DEFAULT_VIEW) {
+    if (view === "list") {
       params.delete("revenueStatsView");
     } else {
       params.set("revenueStatsView", view);
@@ -188,7 +189,7 @@ export const OrdersAnalytics = () => {
 
   const handleOrderLifeCycleViewChange = (view) => {
     const params = new URLSearchParams(searchParams);
-    if (view === DEFAULT_VIEW) {
+    if (view === "list") {
       params.delete("orderLifeCycleView");
     } else {
       params.set("orderLifeCycleView", view);
@@ -196,25 +197,10 @@ export const OrdersAnalytics = () => {
     setSearchParams(params);
   };
 
-  // Tab change handlers
-  const handleRevenueTabChange = (tab) => {
-    const params = new URLSearchParams(searchParams);
-    params.set("revenueTab", tab);
-    params.set("orders", count.toString());
-    params.delete("itemLimits");
-    setSearchParams(params);
-  };
-
-  const handleOrderLifeCycleTabChange = (tab) => {
-    const params = new URLSearchParams(searchParams);
-    params.set("orderLifeCycleTab", tab);
-    params.set("orders", count.toString());
-    params.delete("itemLimits");
-    setSearchParams(params);
-  };
-
+  // Directly push modifications into browser query history
   const handleSetOrdersLimit = (nextLimitValue) => {
     const params = new URLSearchParams(searchParams);
+    // If nextLimit is a functional updater, evaluate it using the current parameter value
     const nextLimit =
       typeof nextLimitValue === "function"
         ? nextLimitValue(ordersParams)
@@ -239,40 +225,6 @@ export const OrdersAnalytics = () => {
     setSearchParams(params);
   };
 
-  // ----- Handlers for Revenue top limits -----
-  const handleRevenueTopProductsChange = (newLimit) => {
-    const params = new URLSearchParams(searchParams);
-    params.set("revenueTopProducts", newLimit.toString());
-    setSearchParams(params);
-  };
-  const handleRevenueTopBuyersChange = (newLimit) => {
-    const params = new URLSearchParams(searchParams);
-    params.set("revenueTopBuyers", newLimit.toString());
-    setSearchParams(params);
-  };
-  const handleRevenueTopStoresChange = (newLimit) => {
-    const params = new URLSearchParams(searchParams);
-    params.set("revenueTopStores", newLimit.toString());
-    setSearchParams(params);
-  };
-
-  // ----- Handlers for Order Life Cycle top limits -----
-  const handleOrderLifeCycleTopProductsChange = (newLimit) => {
-    const params = new URLSearchParams(searchParams);
-    params.set("orderLifeCycleTopProducts", newLimit.toString());
-    setSearchParams(params);
-  };
-  const handleOrderLifeCycleTopBuyersChange = (newLimit) => {
-    const params = new URLSearchParams(searchParams);
-    params.set("orderLifeCycleTopBuyers", newLimit.toString());
-    setSearchParams(params);
-  };
-  const handleOrderLifeCycleTopStoresChange = (newLimit) => {
-    const params = new URLSearchParams(searchParams);
-    params.set("orderLifeCycleTopStores", newLimit.toString());
-    setSearchParams(params);
-  };
-
   return (
     <div className="flex flex-col w-full">
       <div className="flex w-full flex-col gap-2">
@@ -289,18 +241,12 @@ export const OrdersAnalytics = () => {
           setItemsLimits={handleSetItemsLimits}
           defaultItemsCount={ITEMS_COUNT}
           count={count}
-          // Top limits for Revenue
-          revenueTopProducts={urlRevenueTopProducts}
-          onRevenueTopProductsChange={handleRevenueTopProductsChange}
-          revenueTopBuyers={urlRevenueTopBuyers}
-          onRevenueTopBuyersChange={handleRevenueTopBuyersChange}
-          revenueTopStores={urlRevenueTopStores}
-          onRevenueTopStoresChange={handleRevenueTopStoresChange}
         />
         <OrderLifeCycleStats
           processOrderLifeCycleData={processOrderLifeCycleData}
           analyticsData={analyticsData}
           activeOrderLifeCycleTab={activeOrderLifeCycleTab}
+          onOrderLifeCycleTabClick={handleOrderLifeCycleTabChange}
           onOrderLifeCycleViewChange={handleOrderLifeCycleViewChange}
           orderLifeCycleView={orderLifeCycleViewParams}
           ordersLimit={ordersParams}
@@ -309,15 +255,6 @@ export const OrdersAnalytics = () => {
           setItemsLimits={handleSetItemsLimits}
           defaultItemsCount={ITEMS_COUNT}
           count={count}
-          // Top limits for Order Life Cycle
-          orderLifeCycleTopProducts={urlOrderLifeCycleTopProducts}
-          onOrderLifeCycleTopProductsChange={
-            handleOrderLifeCycleTopProductsChange
-          }
-          orderLifeCycleTopBuyers={urlOrderLifeCycleTopBuyers}
-          onOrderLifeCycleTopBuyersChange={handleOrderLifeCycleTopBuyersChange}
-          orderLifeCycleTopStores={urlOrderLifeCycleTopStores}
-          onOrderLifeCycleTopStoresChange={handleOrderLifeCycleTopStoresChange}
         />
       </div>
     </div>

@@ -118,3 +118,14 @@ export const formatWithCommas = (number) => {
   // Add back negative sign if needed
   return isNegative ? `-${result}` : result;
 };
+
+export const getButtonClasses = (isActive, isDisabled) => {
+  const base = "flex rounded text-[12px] px-3 py-1 transition-colors";
+  const modeClass = isActive
+    ? "bg-gray-700 text-white"
+    : "bg-gray-100 text-gray-400";
+  const interactiveClass = isDisabled
+    ? "cursor-not-allowed"
+    : "hover:bg-gray-200 cursor-pointer";
+  return `${base} ${modeClass} ${interactiveClass}`;
+};

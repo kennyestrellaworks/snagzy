@@ -78,57 +78,73 @@ export const RevenueOverTimeChart = ({
   }
 
   return (
-    <div className="bg-white border border-gray-200 rounded-md mt-6 p-4 shadow-sm w-full">
-      <div className="mb-4">
-        <h2 className="text-md font-semibold text-gray-800">
-          Revenue Over Time
-        </h2>
-        <p className="text-xs text-gray-500">
-          Daily pipeline value distribution across key lifecycle states
-        </p>
-      </div>
-      <div className="w-full h-100">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            data={chartData}
-            margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
-          >
-            <CartesianGrid
-              strokeDasharray="3 3"
-              vertical={false}
-              stroke="#F3F4F6"
-            />
-            <XAxis
-              dataKey="label"
-              tickLine={false}
-              axisLine={false}
-              stroke="#6B7280"
-              fontSize={12}
-            />
-            <YAxis
-              tickLine={false}
-              axisLine={false}
-              stroke="#6B7280"
-              fontSize={12}
-              tickFormatter={formatCurrency}
-            />
-            <Tooltip
-              formatter={(value) => [formatCurrency(value), undefined]}
-              contentStyle={{
-                backgroundColor: "#fff",
-                border: "1px solid #E5E7EB",
-                borderRadius: "0.375rem",
-              }}
-            />
-            <Legend verticalAlign="top" height={36} iconType="circle" />
-            {/* To change to a stacked layout instead of side-by-side grouped bars, 
+    <div className="flex w-full mt-4 overflow-hidden">
+      <div className="w-full p-3 bg-white border border-[#C2C2C2] rounded-md transition-all duration-300 ease-in-out overflow-hidden">
+        <div className="w-full">
+          <div className="mb-4">
+            <h2 className="text-md font-semibold text-gray-800">
+              Revenue Over Time
+            </h2>
+            <p className="text-xs text-gray-500">
+              Daily pipeline value distribution across key lifecycle states
+            </p>
+          </div>
+          <div className="w-full h-100">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart
+                data={chartData}
+                margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
+              >
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  vertical={false}
+                  stroke="#F3F4F6"
+                />
+                <XAxis
+                  dataKey="label"
+                  tickLine={false}
+                  axisLine={false}
+                  stroke="#6B7280"
+                  fontSize={12}
+                />
+                <YAxis
+                  tickLine={false}
+                  axisLine={false}
+                  stroke="#6B7280"
+                  fontSize={12}
+                  tickFormatter={formatCurrency}
+                />
+                <Tooltip
+                  formatter={(value) => [formatCurrency(value), undefined]}
+                  contentStyle={{
+                    backgroundColor: "#fff",
+                    border: "1px solid #E5E7EB",
+                    borderRadius: "0.375rem",
+                  }}
+                />
+                <Legend verticalAlign="top" height={36} iconType="circle" />
+                {/* To change to a stacked layout instead of side-by-side grouped bars,
               simply add a matching stackId="revenue" attribute to all three <Bar /> components below.
             */}
-            <Bar dataKey="Total Sales" fill="#10B981" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="Pending Sales" fill="#F59E0B" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="Cancellations" fill="#EF4444" radius={[4, 4, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
+                <Bar
+                  dataKey="Total Sales"
+                  fill="#10B981"
+                  radius={[4, 4, 0, 0]}
+                />
+                <Bar
+                  dataKey="Pending Sales"
+                  fill="#F59E0B"
+                  radius={[4, 4, 0, 0]}
+                />
+                <Bar
+                  dataKey="Cancellations"
+                  fill="#EF4444"
+                  radius={[4, 4, 0, 0]}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
       </div>
     </div>
   );

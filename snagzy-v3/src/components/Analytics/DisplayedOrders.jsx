@@ -34,7 +34,7 @@ export const DisplayedOrders = ({
   sumOrderQuantities,
 }) => {
   return (
-    <div className="flex w-full mt-6 overflow-hidden">
+    <div className="flex w-full mt-4 overflow-hidden">
       <div className="flex flex-col w-full">
         {/* Table header */}
         <div

@@ -1,4 +1,19 @@
 import { AnalyticsStatCardMiniV2 } from "./AnalyticsStatCards";
+import {
+  successfulOrderStatuses,
+  pendingOrderStatuses,
+  unsuccessfulOrderStatuses,
+} from "../../data/orderLifeCycle";
+
+// Helper: returns border class based on status group
+const getBorderClassForStatus = (status) => {
+  if (successfulOrderStatuses.includes(status))
+    return "border-2 border-green-500";
+  if (pendingOrderStatuses.includes(status)) return "border-2 border-amber-400";
+  if (unsuccessfulOrderStatuses.includes(status))
+    return "border-2 border-red-400";
+  return "border-gray-300"; // fallback
+};
 
 export const OrderLifeCycleStatsBoxes = ({
   onOrderLifeCycleTabChange,
@@ -20,7 +35,16 @@ export const OrderLifeCycleStatsBoxes = ({
   statusReturnRequest,
   statusOrderReturned,
   statusRefundSuccess,
+  activeOrderLifeCycleTab,
 }) => {
+  // Helper to compute the final boxStyle for a given card
+  const getBoxStyle = (cardStatus, defaultBoxStyle) => {
+    if (cardStatus !== activeOrderLifeCycleTab) return defaultBoxStyle;
+    const activeBorder = getBorderClassForStatus(cardStatus);
+    // Append the active border class so it overrides the default border
+    return `${defaultBoxStyle} ${activeBorder}`;
+  };
+
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-2 mt-4">
       <div onClick={() => onOrderLifeCycleTabChange("completed")}>
@@ -30,7 +54,8 @@ export const OrderLifeCycleStatsBoxes = ({
             analyticsData,
           )}
           boxTitle={"Completed"}
-          boxStyle={"bg-green-200 border-green-400"}
+          boxStyle={getBoxStyle("completed", "bg-green-200 border-green-400")}
+          activeOrderLifeCycleTab={activeOrderLifeCycleTab}
         />
       </div>
       <div onClick={() => onOrderLifeCycleTabChange("delivered")}>
@@ -40,7 +65,8 @@ export const OrderLifeCycleStatsBoxes = ({
             analyticsData,
           )}
           boxTitle={"Delivered"}
-          boxStyle={"bg-lime-200 border-lime-400"}
+          boxStyle={getBoxStyle("delivered", "bg-lime-200 border-lime-400")}
+          activeOrderLifeCycleTab={activeOrderLifeCycleTab}
         />
       </div>
       <div onClick={() => onOrderLifeCycleTabChange("order_placed")}>
@@ -50,7 +76,11 @@ export const OrderLifeCycleStatsBoxes = ({
             analyticsData,
           )}
           boxTitle={"Order Placed"}
-          boxStyle={"bg-amber-100 border-amber-200"}
+          boxStyle={getBoxStyle(
+            "order_placed",
+            "bg-amber-100 border-amber-200",
+          )}
+          activeOrderLifeCycleTab={activeOrderLifeCycleTab}
         />
       </div>
       <div onClick={() => onOrderLifeCycleTabChange("payment_pending")}>
@@ -60,7 +90,11 @@ export const OrderLifeCycleStatsBoxes = ({
             analyticsData,
           )}
           boxTitle={"Payment Pending"}
-          boxStyle={"bg-amber-100 border-amber-200"}
+          boxStyle={getBoxStyle(
+            "payment_pending",
+            "bg-amber-100 border-amber-200",
+          )}
+          activeOrderLifeCycleTab={activeOrderLifeCycleTab}
         />
       </div>
       <div onClick={() => onOrderLifeCycleTabChange("payment_confirmed")}>
@@ -70,7 +104,11 @@ export const OrderLifeCycleStatsBoxes = ({
             analyticsData,
           )}
           boxTitle={"Payment Confirmed"}
-          boxStyle={"bg-amber-100 border-amber-200"}
+          boxStyle={getBoxStyle(
+            "payment_confirmed",
+            "bg-amber-100 border-amber-200",
+          )}
+          activeOrderLifeCycleTab={activeOrderLifeCycleTab}
         />
       </div>
       <div onClick={() => onOrderLifeCycleTabChange("processing")}>
@@ -80,7 +118,8 @@ export const OrderLifeCycleStatsBoxes = ({
             analyticsData,
           )}
           boxTitle={"Processing"}
-          boxStyle={"bg-amber-100 border-amber-200"}
+          boxStyle={getBoxStyle("processing", "bg-amber-100 border-amber-200")}
+          activeOrderLifeCycleTab={activeOrderLifeCycleTab}
         />
       </div>
       <div onClick={() => onOrderLifeCycleTabChange("packed")}>
@@ -90,7 +129,8 @@ export const OrderLifeCycleStatsBoxes = ({
             analyticsData,
           )}
           boxTitle={"Packed"}
-          boxStyle={"bg-amber-100 border-amber-200"}
+          boxStyle={getBoxStyle("packed", "bg-amber-100 border-amber-200")}
+          activeOrderLifeCycleTab={activeOrderLifeCycleTab}
         />
       </div>
       <div onClick={() => onOrderLifeCycleTabChange("shipped")}>
@@ -100,7 +140,8 @@ export const OrderLifeCycleStatsBoxes = ({
             analyticsData,
           )}
           boxTitle={"Shipped"}
-          boxStyle={"bg-amber-100 border-amber-200"}
+          boxStyle={getBoxStyle("shipped", "bg-amber-100 border-amber-200")}
+          activeOrderLifeCycleTab={activeOrderLifeCycleTab}
         />
       </div>
       <div onClick={() => onOrderLifeCycleTabChange("out_for_delivery")}>
@@ -110,7 +151,11 @@ export const OrderLifeCycleStatsBoxes = ({
             analyticsData,
           )}
           boxTitle={"Out For Delivery"}
-          boxStyle={"bg-amber-100 border-amber-200"}
+          boxStyle={getBoxStyle(
+            "out_for_delivery",
+            "bg-amber-100 border-amber-200",
+          )}
+          activeOrderLifeCycleTab={activeOrderLifeCycleTab}
         />
       </div>
       <div onClick={() => onOrderLifeCycleTabChange("delivery_failed")}>
@@ -120,7 +165,11 @@ export const OrderLifeCycleStatsBoxes = ({
             analyticsData,
           )}
           boxTitle={"Delivery Failed"}
-          boxStyle={"bg-amber-100 border-amber-200"}
+          boxStyle={getBoxStyle(
+            "delivery_failed",
+            "bg-amber-100 border-amber-200",
+          )}
+          activeOrderLifeCycleTab={activeOrderLifeCycleTab}
         />
       </div>
       <div onClick={() => onOrderLifeCycleTabChange("attempted_delivery")}>
@@ -130,7 +179,11 @@ export const OrderLifeCycleStatsBoxes = ({
             analyticsData,
           )}
           boxTitle={"Attempted Delivery"}
-          boxStyle={"bg-amber-100 border-amber-200"}
+          boxStyle={getBoxStyle(
+            "attempted_delivery",
+            "bg-amber-100 border-amber-200",
+          )}
+          activeOrderLifeCycleTab={activeOrderLifeCycleTab}
         />
       </div>
       <div onClick={() => onOrderLifeCycleTabChange("cancelled_by_buyer")}>
@@ -140,7 +193,11 @@ export const OrderLifeCycleStatsBoxes = ({
             analyticsData,
           )}
           boxTitle={"Cancelled by Buyer"}
-          boxStyle={"bg-red-100 border-red-200"}
+          boxStyle={getBoxStyle(
+            "cancelled_by_buyer",
+            "bg-red-100 border-red-200",
+          )}
+          activeOrderLifeCycleTab={activeOrderLifeCycleTab}
         />
       </div>
       <div onClick={() => onOrderLifeCycleTabChange("cancelled_by_seller")}>
@@ -150,7 +207,11 @@ export const OrderLifeCycleStatsBoxes = ({
             analyticsData,
           )}
           boxTitle={"Cancelled by Seller"}
-          boxStyle={"bg-red-100 border-red-200"}
+          boxStyle={getBoxStyle(
+            "cancelled_by_seller",
+            "bg-red-100 border-red-200",
+          )}
+          activeOrderLifeCycleTab={activeOrderLifeCycleTab}
         />
       </div>
       <div onClick={() => onOrderLifeCycleTabChange("return_request")}>
@@ -160,27 +221,30 @@ export const OrderLifeCycleStatsBoxes = ({
             analyticsData,
           )}
           boxTitle={"Return Request"}
-          boxStyle={"bg-red-100 border-red-200"}
+          boxStyle={getBoxStyle("return_request", "bg-red-100 border-red-200")}
+          activeOrderLifeCycleTab={activeOrderLifeCycleTab}
         />
       </div>
-      <div onClick={() => onOrderLifeCycleTabChange("returned")}>
+      <div onClick={() => onOrderLifeCycleTabChange("order_returned")}>
         <AnalyticsStatCardMiniV2
           miniAnalyticsData={processOrderLifeCycleData(
             statusOrderReturned,
             analyticsData,
           )}
-          boxTitle={"Returned"}
-          boxStyle={"bg-red-100 border-red-200"}
+          boxTitle={"Order Returned"}
+          boxStyle={getBoxStyle("order_returned", "bg-red-100 border-red-200")}
+          activeOrderLifeCycleTab={activeOrderLifeCycleTab}
         />
       </div>
-      <div onClick={() => onOrderLifeCycleTabChange("returned_success")}>
+      <div onClick={() => onOrderLifeCycleTabChange("refund_success")}>
         <AnalyticsStatCardMiniV2
           miniAnalyticsData={processOrderLifeCycleData(
             statusRefundSuccess,
             analyticsData,
           )}
-          boxTitle={"Returned Success"}
-          boxStyle={"bg-red-100 border-red-200"}
+          boxTitle={"Refund Success"}
+          boxStyle={getBoxStyle("refund_success", "bg-red-100 border-red-200")}
+          activeOrderLifeCycleTab={activeOrderLifeCycleTab}
         />
       </div>
     </div>

@@ -15,6 +15,8 @@ export const TopByNumberStats1 = ({ analyticsData }) => {
   const [topLimitBuyers, setTopLimitBuyers] = useState(5);
   const [topLimitStores, setTopLimitStores] = useState(5);
 
+  console.log("successfulOrderStatuses", successfulOrderStatuses);
+
   // 2. Updated variables to dynamically track state values
   const topProducts = topAnalyticsValue.getTopSellingProductsByOrderLifeCycle(
     analyticsData,
