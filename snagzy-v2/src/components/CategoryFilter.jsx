@@ -1,3 +1,4 @@
+import { useData } from "../context/DataContext";
 import { IoIosArrowDown } from "./SVG";
 
 export const CategoryFilter = ({
@@ -14,8 +15,33 @@ export const CategoryFilter = ({
   visibleCountParams,
   filteredProducts,
   isStoreSelected,
+  selectedStore,
   isProductStatusSelected,
+  selectedProductStatus,
 }) => {
+  const { getAllProducts } = useData();
+  const allProducts = getAllProducts();
+
+  const processOtherFilters = (categoryId) => {
+    return allProducts.filter((product) => {
+      const matchesCategory =
+        Array.isArray(product.categories) &&
+        product.categories.some((catId) => catId === categoryId);
+      if (!matchesCategory) return false;
+
+      if (isStoreSelected && selectedStore) {
+        if ((product.storeOwnerInfo?.storeId || "") !== selectedStore._id)
+          return false;
+      }
+
+      if (isProductStatusSelected && selectedProductStatus) {
+        if ((product.status || "") !== selectedProductStatus._id) return false;
+      }
+
+      return true;
+    });
+  };
+
   return (
     <div className={` flex flex-col items-start gap-1 z-50`}>
       <div className="relative  inline-block" ref={categoryDropdownRef}>
@@ -25,7 +51,7 @@ export const CategoryFilter = ({
           aria-label={ariaLabel}
           type="button"
         >
-          <div className="border border-gray-400 w-full px-2 py-1 rounded-sm">
+          <div className="border border-gray-400 w-full px-2 py-1 mr-1 rounded-sm">
             <div className="flex gap-1 items-center justify-between">
               {selectedCategoryDisplay}
               {isCategorySelected && selectedCategory && (
@@ -90,7 +116,9 @@ export const CategoryFilter = ({
                   >
                     {category.name}
                     <span className="text-[12px] border border-gray-400 ml-2 px-1 rounded-sm">
-                      {getAllProductsOfCategoryId(category._id).length}
+                      {isStoreSelected || isProductStatusSelected
+                        ? processOtherFilters(category._id)?.length
+                        : getAllProductsOfCategoryId(category._id)?.length}
                     </span>
                   </div>
                 );

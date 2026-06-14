@@ -253,7 +253,12 @@ export const Products = () => {
     <div className="flex flex-col w-full bg-white border border-gray-300 rounded-md overflow-hidden">
       <div className="sticky w-full top-0 z-50">
         <div className="w-full flex flex-1 flex-col p-2">
-          <div className="flex">
+          <div className="flex gap-2">
+            <input
+              placeholder="Search products, product ID, store or store owner ..."
+              className="flex-1 p-2 border border-gray-400 rounded text-sm"
+              aria-label="product-search"
+            />
             {/* Store filter  */}
             <StoreFilter
               stores={stores}
@@ -269,7 +274,9 @@ export const Products = () => {
               filteredProducts={filteredProducts}
               visibleCountParams={visibleCountParams}
               isCategorySelected={isCategorySelected}
+              selectedCategory={selectedCategory}
               isProductStatusSelected={isProductStatusSelected}
+              selectedProductStatus={selectedProductStatus}
             />
             {/* Store filter ends  */}
             <CategoryFilter
@@ -286,7 +293,9 @@ export const Products = () => {
               filteredProducts={filteredProducts}
               visibleCountParams={visibleCountParams}
               isStoreSelected={isStoreSelected}
+              selectedStore={selectedStore}
               isProductStatusSelected={isProductStatusSelected}
+              selectedProductStatus={selectedProductStatus}
             />
             {/* Product status filter  */}
             <ProductStatusFilter
@@ -303,7 +312,9 @@ export const Products = () => {
               filteredProducts={filteredProducts}
               visibleCountParams={visibleCountParams}
               isStoreSelected={isStoreSelected}
+              selectedStore={selectedStore}
               isCategorySelected={isCategorySelected}
+              selectedCategory={selectedCategory}
             />
             {/* Product status filter ends  */}
             <GradientButton buttonName={"Clear Filters"} />

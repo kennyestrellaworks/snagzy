@@ -1,3 +1,4 @@
+import { useData } from "../context/DataContext";
 import { IoIosArrowDown } from "./SVG";
 
 export const StoreFilter = ({
@@ -14,8 +15,33 @@ export const StoreFilter = ({
   visibleCountParams,
   filteredProducts,
   isCategorySelected,
+  selectedCategory,
   isProductStatusSelected,
+  selectedProductStatus,
 }) => {
+  const { getAllProducts } = useData();
+  const allProducts = getAllProducts();
+
+  const processOtherFilters = (storeId) => {
+    return allProducts.filter((product) => {
+      if ((product.storeOwnerInfo?.storeId || "") !== storeId) return false;
+
+      if (isCategorySelected && selectedCategory) {
+        if (
+          !Array.isArray(product.categories) ||
+          !product.categories.some((catId) => catId === selectedCategory._id)
+        )
+          return false;
+      }
+
+      if (isProductStatusSelected && selectedProductStatus) {
+        if ((product.status || "") !== selectedProductStatus._id) return false;
+      }
+
+      return true;
+    });
+  };
+
   return (
     <div className={` flex flex-col items-start gap-1 z-50`}>
       <div className="relative  inline-block" ref={storeDropdownRef}>
@@ -25,7 +51,7 @@ export const StoreFilter = ({
           aria-label={ariaLabel}
           type="button"
         >
-          <div className="border border-gray-400 w-full px-2 py-1 rounded-sm">
+          <div className="border border-gray-400 w-full px-2 py-1 mr-1 rounded-sm">
             <div className="flex gap-1 items-center justify-between">
               {selectedStoreDisplay}
               {isStoreSelected && selectedStore && (
@@ -89,7 +115,9 @@ export const StoreFilter = ({
                   >
                     {store.storeName}
                     <span className="text-[12px] border border-gray-400 ml-2 px-1 rounded-sm">
-                      {getAllProductsOfStoreId(store._id).length}
+                      {isCategorySelected || isProductStatusSelected
+                        ? processOtherFilters(store._id)?.length
+                        : getAllProductsOfStoreId(store._id).length}
                     </span>
                   </div>
                 );
