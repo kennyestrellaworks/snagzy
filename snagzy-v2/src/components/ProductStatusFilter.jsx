@@ -1,3 +1,4 @@
+import { useData } from "../context/DataContext";
 import { IoIosArrowDown } from "./SVG";
 
 export const ProductStatusFilter = ({
@@ -14,18 +15,44 @@ export const ProductStatusFilter = ({
   visibleCountParams,
   filteredProducts,
   isStoreSelected,
+  selectedStore,
   isCategorySelected,
+  selectedCategory,
 }) => {
+  const { getAllProducts } = useData();
+  const allProducts = getAllProducts();
+
+  const processOtherFilters = (productStatusId) => {
+    return allProducts.filter((product) => {
+      if ((product.status || "") !== productStatusId) return false;
+
+      if (isStoreSelected && selectedStore) {
+        if ((product.storeOwnerInfo?.storeId || "") !== selectedStore._id)
+          return false;
+      }
+
+      if (isCategorySelected && selectedCategory) {
+        if (
+          !Array.isArray(product.categories) ||
+          !product.categories.some((catId) => catId === selectedCategory._id)
+        )
+          return false;
+      }
+
+      return true;
+    });
+  };
+
   return (
     <div className={` flex flex-col items-start gap-1 z-50`}>
       <div className="relative  inline-block" ref={productStatusDropdownRef}>
         <button
           onClick={() => setProductStatusDropdownOpen((item) => !item)}
-          className={`p-1 rounded-sm text-sm w-64 border border-gray-400 bg-white text-left flex justify-between items-center cursor-pointer`}
+          className={`p-1 rounded-sm text-sm w-40 border border-gray-400 bg-white text-left flex justify-between items-center cursor-pointer`}
           aria-label={ariaLabel}
           type="button"
         >
-          <div className="border border-gray-400 w-full px-2 py-1 rounded-sm">
+          <div className="border border-gray-400 w-full px-2 py-1 mr-1 rounded-sm">
             <div className="flex gap-1 items-center justify-between">
               {selectedProductStatusDisplay}
               {isProductStatusSelected && selectedProductStatus && (
@@ -63,7 +90,7 @@ export const ProductStatusFilter = ({
           />
         </button>
         {productStatusDropdownOpen && (
-          <div className={`absolute mt-1 w-64 z-50 overflow-hidden`}>
+          <div className={`absolute mt-1 w-40 z-50 overflow-hidden`}>
             <div
               className={`flex flex-col p-1 bg-white border border-gray-400 rounded-sm`}
             >
@@ -90,7 +117,9 @@ export const ProductStatusFilter = ({
                   >
                     {item.name}
                     <span className="text-[12px] border border-gray-400 ml-2 px-1 rounded-sm">
-                      {getAllProductsByStatusId(item._id).length}
+                      {isStoreSelected || isCategorySelected
+                        ? processOtherFilters(item._id)?.length
+                        : getAllProductsByStatusId(item._id).length}
                     </span>
                   </div>
                 );
