@@ -33,13 +33,7 @@ export const ButtonIcon = ({
           }`}
         />
       )}
-      {/* Only render Icon if provided */}
       {Icon ? <Icon className="h-5 w-5" /> : null}
     </button>
-    // <button
-    //   className={`hidden ${className} sm:flex px-3 py-2 rounded-md text-sm font-medium transition duration-150 ease-in-out`}
-    // >
-    //   {Icon ? <Icon className="h-5 w-5" /> : null}
-    // </button>
   );
 };

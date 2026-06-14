@@ -3,35 +3,33 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #232e46;
+  --background: 255, 255, 255; /* #FFFFFF */
+  --foreground: 35, 46, 70; /* #232E46 */
 
-  --primary: #e5e7eb;
-  --primary-light: #d8d9dd;
-  --primary-dark: #9ca3af;
+  --primary: 229, 231, 235; /* #E5E7EB */
+  --primary-light: 216, 217, 221; /* #D8D9DD */
+  --primary-dark: 156, 163, 175; /* #9CA3AF */
 
-  --secondary: #7a808a;
-  --secondary-light: #6f747d;
-  --secondary-dark: #656a72;
+  --secondary: 122, 128, 138; /* #7A808A */
+  --secondary-light: 111, 116, 125; /* #6F747D */
+  --secondary-dark: 101, 106, 114; /* #656A72 */
+
+  --tertiary: 29, 78, 216; /* #1D4ED8 */
+  --tertiary-light: 59, 130, 246; /* #3B82F6 */
+  --tertiary-dark: 30, 64, 175; /* #1E40AF */
 
   --tester: var(--tertiary-dark);
   --tester2: var(--tertiary);
   --tester3: red;
 
-  --tertiary: #1d4ed8;
-  --tertiary-light: #3b82f6;
-  --tertiary-dark: #1e40af;
-
   --theme-navbar-bg: var(--background);
   --theme-navbar-border-b: var(--primary);
 
-  --theme-navbar-nav: var(--tester);
-  --theme-navbar-nav-link: var(--tester);
-  --theme-navbar-nav-dropdown: var(--tester);
-  --theme-navbar-nav-dropdown-item-hover: var(--tester2);
+  --theme-navItem-background: red;
+  --theme-navItem-fontSize: 2rem;
 
-  --theme-navbar-search: var(--tester);
-  --theme-navbar-search-icon: var(--tester3);
+  --theme-navbar-search: var();
+  --theme-navbar-search-icon: var();
 }
 
 .dark-mode {
@@ -74,104 +72,10 @@
 
 /* Navbar  */
 .theme-navbar {
-  background-color: var(--theme-navbar-bg);
-  border-bottom: 1px solid var(--theme-navbar-border-b);
+  background-color: rgb(var(--theme-navbar-bg));
+  border-bottom: 1px solid rgb(var(--theme-navbar-border-b));
 }
-.theme-navbar-link {
-  background-color: var(--theme-navbar-nav-link);
-  color: var(--tester3);
+.theme-navItem {
+  color: var(--theme-navItem-bg);
+  font-size: var(--theme-navItem-fontSize);
 }
-.theme-navbar-nav-dropdown {
-  background-color: var(--tester);
-}
-.theme-navbar-nav-dropdown-item:hover {
-  background-color: var(--tester2);
-  color: var(--tester3);
-}
-/* Navbar search input  */
-.theme-navbar-search {
-  background-color: tan;
-  border: 1px solid red;
-  color: white;
-}
-.theme-navbar-search-icon {
-  color: yellow;
-}
-.theme-navbar-search::placeholder {
-  color: green;
-}
-
-/* .theme-bg {
-  background-color: rgba(var(--background));
-}
-.theme-text {
-  color: rgba(var(--foreground));
-}
-.theme-text-dark {
-  color: rgba(var(--secondary-dark));
-}
-.theme-border {
-  border: 1px solid rgba(var(--secondary));
-}
-.theme-border-b {
-  border-bottom: 1px solid rgba(var(--secondary));
-}
-
-/* Button/link with dropdown  */
-/* .theme-btn {
-  background-color: rgba(var(--btn-bg));
-  border: 1px solid rgba(var(--btn-border));
-  color: rgba(var(--btn-text));
-}
-.theme-btn-hover {
-  background-color: rgba(var(--btn-bg-hover));
-}
-.theme-btn-ring {
-  color: rgba(var(--btn-ring));
-}
-.theme-list {
-  background-color: rgba(var(--list));
-}
-.theme-list-text {
-  color: rgba(var(--list-text));
-}
-.theme-list-item {
-  color: rgba(var(--list-text));
-  background-color: rgba(var(--list-bg));
-  transition: background-color 0.2s ease, color 0.2s ease;
-}
-.theme-list-item:hover {
-  background-color: rgba(var(--list-bg-hover));
-}
-.theme-btn-icon-bg-is-open {
-  background-color: rgba(var(--btn-icon-bg-hover));
-  color: rgba(var(--btn-icon-hover));
-}
-.theme-btn-icon-bg:hover {
-  background-color: rgba(var(--btn-icon-bg-hover));
-  color: rgba(var(--tester));
-}
-.theme-btn-icon {
-  color: rgba(var(--btn-icon));
-}
-.theme-btn-icon:hover {
-  color: rgba(var(--btn-icon-hover));
-} */
-
-/* Searcn input  */
-/* .theme-search-input {
-  background-color: rgba(var(--search-input-bg), 0.5);
-  border: 1px solid rgba(var(--search-input-border));
-  color: rgba(var(--search-input-text));
-}
-.theme-search-input::placeholder {
-  color: rgba(var(--search-input-placeholder));
-}
-.theme-search-input-icon {
-  fill: rgba(var(--search-input-icon));
-}
-
-/* Navbar buttons/links  */
-/* .theme-btn-icon-bg:hover {
-  background-color: rgba(var(--btn-icon-bg));
-}  */
