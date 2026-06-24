@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Random ID Generator</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 600px;
+        margin: 50px auto;
+        padding: 20px;
+        background-color: #f5f5f5;
+      }
+      .container {
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+        color: #333;
+        text-align: center;
+      }
+      .input-group {
+        margin-bottom: 20px;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+        color: #555;
+      }
+      input {
+        width: 100%;
+        padding: 10px;
+        border: 2px solid #ddd;
+        border-radius: 5px;
+        font-size: 16px;
+        box-sizing: border-box;
+      }
+      button {
+        background-color: #007bff;
+        color: white;
+        padding: 12px 24px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        width: 100%;
+        margin-bottom: 20px;
+      }
+      button:hover {
+        background-color: #0056b3;
+      }
+      .result {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 5px;
+        border-left: 4px solid #007bff;
+        word-break: break-all;
+        font-family: monospace;
+        font-size: 18px;
+        text-align: center;
+      }
+      .copy-btn {
+        background-color: #28a745;
+        width: auto;
+        margin-top: 10px;
+      }
+      .copy-btn:hover {
+        background-color: #218838;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Random ID Generator</h1>
+
+      <div class="input-group">
+        <label for="length">Enter ID Length:</label>
+        <input
+          type="number"
+          id="length"
+          min="1"
+          max="50"
+          value="9"
+          placeholder="Enter number of characters..."
+        />
+      </div>
+
+      <button onclick="generateID()">Generate Random ID</button>
+
+      <div class="result" id="result">
+        Your generated ID will appear here...
+      </div>
+
+      <button class="copy-btn" onclick="copyToClipboard()">
+        Copy to Clipboard
+      </button>
+    </div>
+
+    <script>
+      function generateRandomID(length) {
+        // Define character sets
+        const letters = "abcdefghijklmnopqrstuvwxyz";
+        const numbers = "0123456789";
+
+        let randomLetters = "";
+        let randomNumbers = "";
+
+        // Generate random letters
+        for (let i = 0; i < length; i++) {
+          const randomIndex = Math.floor(Math.random() * letters.length);
+          randomLetters += letters[randomIndex];
+        }
+
+        // Generate random numbers
+        for (let i = 0; i < length; i++) {
+          const randomIndex = Math.floor(Math.random() * numbers.length);
+          randomNumbers += numbers[randomIndex];
+        }
+
+        // Combine and shuffle the letters and numbers
+        const combined = randomLetters + randomNumbers;
+        const shuffled = combined
+          .split("")
+          .sort(() => Math.random() - 0.5)
+          .join("");
+        const prefixed = `orderitem${shuffled}`;
+
+        return prefixed;
+      }
+
+      function generateID() {
+        const lengthInput = document.getElementById("length");
+        const resultDiv = document.getElementById("result");
+
+        const length = parseInt(lengthInput.value);
+
+        if (isNaN(length) || length < 1) {
+          resultDiv.textContent = "Please enter a valid number greater than 0";
+          resultDiv.style.color = "red";
+          return;
+        }
+
+        if (length > 50) {
+          resultDiv.textContent =
+            "Please enter a number less than or equal to 50";
+          resultDiv.style.color = "red";
+          return;
+        }
+
+        const randomID = generateRandomID(length);
+        resultDiv.textContent = randomID;
+        resultDiv.style.color = "#333";
+      }
+
+      function copyToClipboard() {
+        const resultDiv = document.getElementById("result");
+        const text = resultDiv.textContent;
+
+        // Check if the text is not the placeholder
+        if (
+          text !== "Your generated ID will appear here..." &&
+          !text.includes("Please enter")
+        ) {
+          navigator.clipboard
+            .writeText(text)
+            .then(() => {
+              const originalText = resultDiv.textContent;
+              resultDiv.textContent = "✓ Copied to clipboard!";
+              resultDiv.style.color = "green";
+
+              setTimeout(() => {
+                resultDiv.textContent = originalText;
+                resultDiv.style.color = "#333";
+              }, 2000);
+            })
+            .catch((err) => {
+              console.error("Failed to copy: ", err);
+              alert("Failed to copy to clipboard");
+            });
+        }
+      }
+
+      // Allow pressing Enter to generate ID
+      document
+        .getElementById("length")
+        .addEventListener("keypress", function (event) {
+          if (event.key === "Enter") {
+            generateID();
+          }
+        });
+
+      // Generate an ID when the page loads
+      window.addEventListener("load", generateID);
+    </script>
+  </body>
+</html>
