@@ -199,11 +199,11 @@ export const AnalyticsLayout = () => {
         </div>
         <div className="flex pl-2 pr-2 w-full justify-between items-center bg-[#F3F3F3] border-t border-b border-[#C2C2C2] z-10 py-1">
           <PageHeader
-            defaultPage="Products"
+            defaultPage="Orders"
             type="analytics-level"
             suffix="Related Analytics"
           />
-
+          {/* Year, month and day filter  */}
           <div className="flex gap-4 items-center">
             <div className="flex items-center gap-2">
               <label
@@ -286,6 +286,7 @@ export const AnalyticsLayout = () => {
               </button>
             )}
           </div>
+          {/* Year, month and day filter ends */}
         </div>
       </div>
 

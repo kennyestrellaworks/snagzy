@@ -175,7 +175,6 @@ export const OrdersAnalytics = () => {
     return { ordersToProcess, sumOfTotalPrices, sumOfAllQuantities };
   };
 
-  // ----- VIEW CHANGE HANDLERS -----
   const handleRevenueStatsViewChange = (view) => {
     const params = new URLSearchParams(searchParams);
     if (view === DEFAULT_VIEW) {
@@ -200,14 +199,6 @@ export const OrdersAnalytics = () => {
   const handleRevenueTabChange = (tab) => {
     const params = new URLSearchParams(searchParams);
     params.set("revenueTab", tab);
-    params.set("orders", count.toString());
-    params.delete("itemLimits");
-    setSearchParams(params);
-  };
-
-  const handleOrderLifeCycleTabChange = (tab) => {
-    const params = new URLSearchParams(searchParams);
-    params.set("orderLifeCycleTab", tab);
     params.set("orders", count.toString());
     params.delete("itemLimits");
     setSearchParams(params);
