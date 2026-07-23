@@ -9,38 +9,53 @@ export const PageHeader = ({ defaultPage, type, prefix, suffix }) => {
     getAnalyticsLayoutNavLinks,
   } = useData();
 
-  let navLinkObject = {};
+  let navLinkObject = [];
 
   if (type === "sidebar-level") {
     navLinkObject = getSidebarNavLinks();
-  }
-
-  if (type === "user-level") {
+  } else if (type === "user-level") {
     navLinkObject = getUserLayoutNavLinks();
-  }
-
-  if (type === "product-level") {
+  } else if (type === "product-level") {
     navLinkObject = getProductLayoutNavLinks();
-  }
-
-  if (type === "analytics-level") {
+  } else if (type === "analytics-level") {
     navLinkObject = getAnalyticsLayoutNavLinks();
   }
 
-  // URL information
   const location = useLocation();
-  const currentLocation = navLinkObject.filter((navLink) =>
-    location.pathname.includes(navLink.link),
-  );
-  // console.log("currentLocation", currentLocation);
+  const normalizedPath = location.pathname.replace(/\/+$/, "");
+
+  const getBasePath = () => {
+    if (type === "analytics-level") return "/analytics";
+    if (type === "product-level") return "/products";
+    if (type === "user-level") return "/users";
+    return "";
+  };
+
+  const matchedNavLink =
+    navLinkObject.find((navLink) => {
+      const link = navLink.link?.trim();
+
+      if (!link) return false;
+
+      const basePath = getBasePath();
+      const targetPath = basePath ? `${basePath}/${link}` : `/${link}`;
+
+      return (
+        normalizedPath === targetPath ||
+        normalizedPath.startsWith(`${targetPath}/`) ||
+        normalizedPath.endsWith(`/${link}`)
+      );
+    }) ||
+    navLinkObject.find((navLink) => !navLink.link?.trim()) ||
+    null;
+
+  const currentLabel = matchedNavLink?.label || defaultPage;
 
   return (
     <h1>
       {prefix && `${prefix} `}
-      {currentLocation.length === 1
-        ? defaultPage
-        : currentLocation[1]?.label}{" "}
-      {suffix && suffix}
+      {currentLabel}
+      {suffix && ` ${suffix}`}
     </h1>
   );
 };
