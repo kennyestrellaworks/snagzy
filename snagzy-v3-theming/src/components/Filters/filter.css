@@ -1,0 +1,143 @@
+/* Store filter  */
+.store-filter .filter-button {
+  border: 1px solid #c4dcfe;
+  background-color: #f2f8ff;
+  width: 15rem;
+}
+
+.store-filter .filter-title-active {
+  border: 1px solid #c0dbfc;
+  background-color: #e1edfe;
+  color: #155dfc;
+}
+
+.store-filter .arrow-icon {
+  color: #155dfc;
+}
+
+.store-filter .filter-options {
+  border: 1px solid #c4dcfe;
+}
+
+.store-filter .count-badge {
+  background-color: #d8e9ff;
+  border: 1px solid #aecaee;
+  color: #155dfc;
+}
+
+.store-filter .count-of {
+  color: #7ca2f4;
+}
+
+.store-filter .of-count {
+  color: #7ca2f4;
+}
+
+.store-filter .filter-list:hover,
+.store-filter .filter-list-active {
+  background-color: #eff6ff;
+  color: #155dfc;
+}
+
+.store-filter .filter-list:hover .count-badge-item,
+.store-filter .count-badge-item-active {
+  background-color: #d8e9ff;
+  border: 1px solid #aecaee;
+  color: #155dfc;
+}
+
+/* Category filter  */
+.category-filter .filter-button {
+  border: 1px solid #e6cfcf;
+  background-color: #f5eded;
+  width: 16.5rem;
+}
+
+.category-filter .filter-title-active {
+  border: 1px solid #e4bfbf;
+  background-color: #f1dfdf;
+  color: #9e3634;
+}
+
+.category-filter .arrow-icon {
+  color: #9e3634;
+}
+
+.category-filter .filter-options {
+  border: 1px solid #e4bfbf;
+}
+
+.category-filter .count-badge {
+  background-color: #ebcccc;
+  border: 1px solid #dfb1b1;
+  color: #9e3634;
+}
+
+.category-filter .count-of {
+  color: #da7372;
+}
+
+.category-filter .of-count {
+  color: #da7372;
+}
+
+.category-filter .filter-list:hover,
+.category-filter .filter-list-active {
+  background-color: #f6ebeb;
+  color: #9e3634;
+}
+
+.category-filter .filter-list:hover .count-badge-item,
+.category-filter .count-badge-item-active {
+  background-color: #f5d8d8;
+  border: 1px solid #ebbfbf;
+  color: #9e3634;
+}
+
+/* Product status filter  */
+.product-status-filter .filter-button {
+  border: 1px solid #a7e2eb;
+  background-color: #e4f7fa;
+  width: 13.5rem;
+}
+
+.product-status-filter .filter-title-active {
+  border: 1px solid #7bdbee;
+  background-color: #cef4fa;
+  color: #2496a8;
+}
+
+.product-status-filter .arrow-icon {
+  color: #2496a8;
+}
+
+.product-status-filter .filter-options {
+  border: 1px solid #e4bfbf;
+}
+
+.product-status-filter .count-badge {
+  background-color: #b5eef7;
+  border: 1px solid #6bd1e1;
+  color: #2496a8;
+}
+
+.product-status-filter .count-of {
+  color: #61d2e3;
+}
+
+.product-status-filter .of-count {
+  color: #6bd1e1;
+}
+
+.product-status-filter .filter-list:hover,
+.product-status-filter .filter-list-active {
+  background-color: #e4f7fa;
+  color: #2496a8;
+}
+
+.product-status-filter .filter-list:hover .count-badge-item,
+.product-status-filter .count-badge-item-active {
+  background-color: #b5eef7;
+  border: 1px solid #6bd1e1;
+  color: #2496a8;
+}
