@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Rich text editor + rendered content shared styles */
+.prose-content:empty::before {
+  content: attr(data-placeholder);
+  color: #9ca3af;
+  pointer-events: none;
+}
+
+.prose-content a {
+  color: #2563eb;
+  text-decoration: underline;
+  font-weight: 500;
+}
+
+.prose-content a:hover {
+  color: #1d4ed8;
+}
+
+.prose-content ul {
+  list-style: disc;
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+}
+
+.prose-content ol {
+  list-style: decimal;
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+}
+
+.prose-content p {
+  margin: 0.25rem 0;
+}
