@@ -9,7 +9,6 @@ import {
   Send,
   Loader2,
   X,
-  ImageIcon,
 } from "lucide-react";
 
 const CATEGORIES = [
@@ -23,7 +22,7 @@ const CATEGORIES = [
   "Other",
 ];
 
-export default function CreatePost({ onCreated }) {
+export default function CreatePost1({ onCreated }) {
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState(CATEGORIES[0]);
   const [content, setContent] = useState("");
@@ -36,9 +35,7 @@ export default function CreatePost({ onCreated }) {
   const [showLinkInput, setShowLinkInput] = useState(false);
   const [linkUrl, setLinkUrl] = useState("");
   const editorRef = useRef(null);
-  const imageInputRef = useRef(null);
   const savedRangeRef = useRef(null);
-  const pendingImagesRef = useRef(new Map());
 
   useEffect(() => {
     const fetchEmojis = async () => {
@@ -84,6 +81,7 @@ export default function CreatePost({ onCreated }) {
         range.insertNode(element);
         range.setStart(element.firstChild, 1);
         range.collapse(true);
+      } else {
         element.appendChild(range.extractContents());
         range.insertNode(element);
         range.selectNodeContents(element);
@@ -117,102 +115,6 @@ export default function CreatePost({ onCreated }) {
     if (!selection) return;
     selection.removeAllRanges();
     selection.addRange(savedRangeRef.current);
-  };
-
-  const insertImage = (imageUrl, fileName, pendingImageId) => {
-    restoreSelection();
-    const selection = window.getSelection();
-    if (!selection || selection.rangeCount === 0 || !editorRef.current) return;
-
-    const range = selection.getRangeAt(0);
-    if (!editorRef.current.contains(range.commonAncestorContainer)) return;
-
-    const image = document.createElement("img");
-    image.src = imageUrl;
-    image.alt = fileName;
-    image.className = "my-3 max-w-full h-auto rounded-lg";
-    if (pendingImageId) image.dataset.pendingImageId = pendingImageId;
-    range.deleteContents();
-    range.insertNode(image);
-    range.setStartAfter(image);
-    range.collapse(true);
-    selection.removeAllRanges();
-    selection.addRange(range);
-    refreshContent();
-  };
-
-  const handleImageSelected = (event) => {
-    const file = event.target.files?.[0];
-    event.target.value = "";
-    if (!file) return;
-
-    if (!file.type.startsWith("image/")) {
-      setError("Please select an image file.");
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      setError("Images must be 5 MB or smaller.");
-      return;
-    }
-
-    const pendingImageId = crypto.randomUUID();
-    const previewUrl = URL.createObjectURL(file);
-    pendingImagesRef.current.set(pendingImageId, {
-      file,
-      previewUrl,
-    });
-    insertImage(previewUrl, file.name, pendingImageId);
-    savedRangeRef.current = null;
-  };
-
-  const uploadPendingImages = async () => {
-    if (!editorRef.current) return content;
-
-    const documentFragment = new DOMParser().parseFromString(
-      editorRef.current.innerHTML,
-      "text/html",
-    );
-    const imageElements = [
-      ...documentFragment.body.querySelectorAll("img[data-pending-image-id]"),
-    ];
-    const uploadedPaths = [];
-    const pendingImageIds = [];
-
-    try {
-      for (const image of imageElements) {
-        const pendingImageId = image.dataset.pendingImageId;
-        const pendingImage = pendingImagesRef.current.get(pendingImageId);
-        if (!pendingImage) continue;
-
-        const filePath = `${crypto.randomUUID()}-${pendingImage.file.name}`;
-        const { error: uploadError } = await supabase.storage
-          .from("images")
-          .upload(filePath, pendingImage.file, {
-            contentType: pendingImage.file.type,
-            upsert: false,
-          });
-
-        if (uploadError) throw uploadError;
-
-        uploadedPaths.push(filePath);
-        pendingImageIds.push(pendingImageId);
-        const { data } = supabase.storage.from("images").getPublicUrl(filePath);
-        image.src = data.publicUrl;
-        image.removeAttribute("data-pending-image-id");
-      }
-
-      return {
-        content: documentFragment.body.innerHTML,
-        uploadedPaths,
-        pendingImageIds,
-      };
-    } catch (uploadError) {
-      if (uploadedPaths.length > 0) {
-        await supabase.storage.from("images").remove(uploadedPaths);
-      }
-      throw uploadError;
-    }
   };
 
   const handleLink = () => {
@@ -264,20 +166,11 @@ export default function CreatePost({ onCreated }) {
     setError(null);
     setSuccess(false);
 
-    let uploadedImageResult;
-    try {
-      uploadedImageResult = await uploadPendingImages();
-    } catch (uploadError) {
-      setSaving(false);
-      setError(uploadError.message);
-      return;
-    }
-
     const { data, error: insertError } = await supabase
       .from("posts")
       .insert({
         title: title.trim(),
-        content: uploadedImageResult.content,
+        content,
         category,
       })
       .select()
@@ -286,11 +179,6 @@ export default function CreatePost({ onCreated }) {
     setSaving(false);
 
     if (insertError) {
-      if (uploadedImageResult.uploadedPaths.length > 0) {
-        await supabase.storage
-          .from("images")
-          .remove(uploadedImageResult.uploadedPaths);
-      }
       setError(insertError.message);
       return;
     }
@@ -300,11 +188,6 @@ export default function CreatePost({ onCreated }) {
     setCategory(CATEGORIES[0]);
     setContent("");
     if (editorRef.current) editorRef.current.innerHTML = "";
-    uploadedImageResult.pendingImageIds.forEach((pendingImageId) => {
-      const pendingImage = pendingImagesRef.current.get(pendingImageId);
-      if (pendingImage) URL.revokeObjectURL(pendingImage.previewUrl);
-      pendingImagesRef.current.delete(pendingImageId);
-    });
     setShowEmojiPicker(false);
     setShowLinkInput(false);
     setLinkUrl("");
@@ -386,22 +269,6 @@ export default function CreatePost({ onCreated }) {
             >
               <LinkIcon className="w-4 h-4" />
             </ToolbarButton>
-
-            <ToolbarButton
-              onClick={() => imageInputRef.current?.click()}
-              onMouseDown={saveSelection}
-              label="Insert image"
-            >
-              <ImageIcon className="w-4 h-4" />
-            </ToolbarButton>
-
-            <input
-              ref={imageInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleImageSelected}
-              className="hidden"
-            />
 
             <ToolbarButton
               onClick={() => setShowEmojiPicker((v) => !v)}
@@ -520,23 +387,12 @@ export default function CreatePost({ onCreated }) {
   );
 }
 
-function ToolbarButton({
-  children,
-  onClick,
-  onMouseDown,
-  label,
-  active,
-  disabled = false,
-}) {
+function ToolbarButton({ children, onClick, label, active }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      onMouseDown={(event) => {
-        event.preventDefault();
-        onMouseDown?.(event);
-      }}
-      disabled={disabled}
+      onMouseDown={(event) => event.preventDefault()}
       title={label}
       aria-label={label}
       className={`p-2 rounded-md transition ${
