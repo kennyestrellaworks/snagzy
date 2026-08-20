@@ -12,6 +12,29 @@ function sanitizeContent(html) {
   return doc.body.innerHTML;
 }
 
+function getImageStoragePaths(html) {
+  if (typeof window === "undefined") return [];
+
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  const bucketPath = "/storage/v1/object/public/images/";
+
+  return [
+    ...new Set(
+      [...doc.querySelectorAll("img[src]")]
+        .map((image) => {
+          try {
+            const path = new URL(image.src).pathname;
+            if (!path.includes(bucketPath)) return null;
+            return decodeURIComponent(path.split(bucketPath)[1]);
+          } catch {
+            return null;
+          }
+        })
+        .filter(Boolean),
+    ),
+  ];
+}
+
 export default function Posts({ refreshKey = 0 }) {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -45,6 +68,23 @@ export default function Posts({ refreshKey = 0 }) {
 
   const handleDelete = async (id) => {
     setDeletingId(id);
+    setError(null);
+
+    const post = posts.find((item) => item.id === id);
+    const imagePaths = post ? getImageStoragePaths(post.content) : [];
+
+    if (imagePaths.length > 0) {
+      const { error: imageDeleteError } = await supabase.storage
+        .from("images")
+        .remove(imagePaths);
+
+      if (imageDeleteError) {
+        setDeletingId(null);
+        setError(imageDeleteError.message);
+        return;
+      }
+    }
+
     const { error: deleteError } = await supabase
       .from("posts")
       .delete()
