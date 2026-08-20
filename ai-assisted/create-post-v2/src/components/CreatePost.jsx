@@ -61,18 +61,42 @@ export default function CreatePost({ onCreated }) {
     }
   }, []);
 
-  const exec = useCallback(
-    (command, value = null) => {
-      editorRef.current?.focus();
-      document.execCommand(command, false, value);
+  const formatSelection = useCallback(
+    (tagName, attributes = {}) => {
+      const selection = window.getSelection();
+      if (!selection || selection.rangeCount === 0 || !editorRef.current) {
+        return;
+      }
+
+      const range = selection.getRangeAt(0);
+      if (!editorRef.current.contains(range.commonAncestorContainer)) return;
+
+      const element = document.createElement(tagName);
+      Object.entries(attributes).forEach(([name, value]) => {
+        element.setAttribute(name, value);
+      });
+
+      if (range.collapsed) {
+        element.appendChild(document.createTextNode("\u200B"));
+        range.insertNode(element);
+        range.setStart(element.firstChild, 1);
+        range.collapse(true);
+      } else {
+        element.appendChild(range.extractContents());
+        range.insertNode(element);
+        range.selectNodeContents(element);
+      }
+
+      selection.removeAllRanges();
+      selection.addRange(range);
       refreshContent();
     },
     [refreshContent],
   );
 
-  const handleBold = () => exec("bold");
-  const handleItalic = () => exec("italic");
-  const handleUnderline = () => exec("underline");
+  const handleBold = () => formatSelection("strong");
+  const handleItalic = () => formatSelection("em");
+  const handleUnderline = () => formatSelection("u");
 
   const saveSelection = () => {
     const selection = window.getSelection();
@@ -99,14 +123,11 @@ export default function CreatePost({ onCreated }) {
       if (url) {
         const fullUrl = url.startsWith("http") ? url : `https://${url}`;
         restoreSelection();
-        exec("createLink", fullUrl);
-        if (editorRef.current) {
-          editorRef.current.querySelectorAll("a").forEach((a) => {
-            a.setAttribute("target", "_blank");
-            a.setAttribute("rel", "noopener noreferrer");
-          });
-          refreshContent();
-        }
+        formatSelection("a", {
+          href: fullUrl,
+          target: "_blank",
+          rel: "noopener noreferrer",
+        });
       }
       setShowLinkInput(false);
       setLinkUrl("");
@@ -118,8 +139,19 @@ export default function CreatePost({ onCreated }) {
   };
 
   const insertEmoji = (emoji) => {
-    editorRef.current?.focus();
-    document.execCommand("insertText", false, emoji);
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0 || !editorRef.current) {
+      return;
+    }
+
+    const range = selection.getRangeAt(0);
+    if (!editorRef.current.contains(range.commonAncestorContainer)) return;
+
+    range.deleteContents();
+    range.insertNode(document.createTextNode(emoji));
+    range.collapse(false);
+    selection.removeAllRanges();
+    selection.addRange(range);
     refreshContent();
   };
 
@@ -298,6 +330,7 @@ export default function CreatePost({ onCreated }) {
                   <button
                     key={id}
                     type="button"
+                    onMouseDown={(event) => event.preventDefault()}
                     onClick={() => {
                       insertEmoji(value);
                       setShowEmojiPicker(false);
@@ -359,6 +392,7 @@ function ToolbarButton({ children, onClick, label, active }) {
     <button
       type="button"
       onClick={onClick}
+      onMouseDown={(event) => event.preventDefault()}
       title={label}
       aria-label={label}
       className={`p-2 rounded-md transition ${
